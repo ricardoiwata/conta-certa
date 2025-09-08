@@ -1,32 +1,26 @@
-// src/theme/scheme.ts
 import { brand, feedback, neutrals } from './palette';
 
 export type ColorTokens = {
-    // fundamentos
     background: string;
     surface: string;
     surfaceAlt: string;
     border: string;
     shadow: string;
 
-    // texto
     text: string;
     textMuted: string;
     textOnPrimary: string;
 
-    // ação
     primary: string;
     primaryContainer: string;
 
-    // feedback
     error: string;
     warning: string;
     success: string;
 
-    // estados/overlays
-    overlay: string;          // para modais
-    pressOpacity: number;     // 0..1
-    disabledOpacity: number;  // 0..1
+    overlay: string;
+    pressOpacity: number;
+    disabledOpacity: number;
 };
 
 export const lightColors: ColorTokens = {
@@ -63,7 +57,6 @@ export const darkColors: ColorTokens = {
     textMuted: neutrals.n_300,
     textOnPrimary: neutrals.n_950,
 
-    // em dark, elevamos o “primary” para manter contraste AA/AAA
     primary: brand.primary_200,
     primaryContainer: brand.primary_600,
 

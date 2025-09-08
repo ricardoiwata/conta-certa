@@ -1,4 +1,3 @@
-// src/theme/provider.tsx
 import {
   DarkTheme,
   DefaultTheme,

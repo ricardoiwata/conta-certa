@@ -1,9 +1,8 @@
-// src/theme/palette.ts
 export const brand = {
-    primary_700: '#073C33',
-    primary_600: '#0A4C41',
-    primary_300: '#6ED4B1',
-    primary_200: '#8FE5C1',
+    primary_700: '#095513',
+    primary_600: '#0b5e15',
+    primary_300: '#26d423',
+    primary_200: '#14a61b',
     primary_050: '#D1F3DB',
 };
 
