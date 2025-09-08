@@ -93,6 +93,7 @@ export default function LoginScreen() {
             left={<TextInput.Icon icon="email-outline" />}
             error={emailInvalid}
             style={{ width: "100%" }}
+            testID="login-email"
           />
           {emailInvalid && (
             <HelperText type="error" style={{ width: "100%" }}>
@@ -113,6 +114,7 @@ export default function LoginScreen() {
               />
             }
             style={{ width: "100%" }}
+            testID="login-password"
           />
 
           {error && (
@@ -127,6 +129,7 @@ export default function LoginScreen() {
             loading={submitting}
             disabled={submitting || emailInvalid || !password}
             style={{ width: "100%" }}
+            testID="login-submit"
           >
             Entrar
           </Button>

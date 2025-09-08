@@ -58,6 +58,7 @@ export default function ResetScreen() {
             left={<TextInput.Icon icon="email-outline" />}
             error={emailInvalid}
             style={{ width: "100%" }}
+            testID="reset-email"
           />
           <HelperText
             type="error"
@@ -71,6 +72,7 @@ export default function ResetScreen() {
             onPress={handleReset}
             disabled={emailInvalid || !email}
             style={{ width: "100%" }}
+            testID="reset-submit"
           >
             Enviar
           </Button>

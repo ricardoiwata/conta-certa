@@ -98,6 +98,7 @@ export default function RegisterScreen() {
             onChangeText={setName}
             left={<TextInput.Icon icon="account-outline" />}
             style={{ width: "100%" }}
+            testID="register-name"
           />
 
           <TextInput
@@ -109,6 +110,7 @@ export default function RegisterScreen() {
             left={<TextInput.Icon icon="email-outline" />}
             error={emailInvalid}
             style={{ width: "100%" }}
+            testID="register-email"
           />
           {emailInvalid && (
             <HelperText
@@ -134,6 +136,7 @@ export default function RegisterScreen() {
             }
             error={passWeak}
             style={{ width: "100%" }}
+            testID="register-password"
           />
           {passWeak && (
             <HelperText type="error" visible style={{ width: "100%" }}>
@@ -155,6 +158,7 @@ export default function RegisterScreen() {
             }
             error={passMismatch}
             style={{ width: "100%" }}
+            testID="register-confirm"
           />
           {passMismatch && (
             <HelperText type="error" visible style={{ width: "100%" }}>
@@ -172,6 +176,7 @@ export default function RegisterScreen() {
             loading={submitting}
             disabled={!canSubmit}
             style={{ width: "100%", marginTop: 24 }}
+            testID="register-submit"
           >
             Cadastrar
           </Button>
