@@ -1,14 +1,14 @@
+import { useRouter } from "expo-router";
 import React from "react";
 import { View } from "react-native";
 import { Button as PaperButton, Text as PaperText } from "react-native-paper";
 import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
 import { welcomeStyles as styles } from "../styles/welcome.styles";
 import { useAppTheme } from "../theme/provider";
-// import { useRouter } from "expo-router";
 
 export default function WelcomeScreen() {
   const { colors } = useAppTheme();
-  // const router = useRouter();
+  const router = useRouter();
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -33,7 +33,7 @@ export default function WelcomeScreen() {
       <View style={styles.actions}>
         <PaperButton
           mode="contained"
-          // onPress={() => router.push("/(public)/login")}
+          onPress={() => router.push("/login")}
           style={styles.button}
           contentStyle={styles.buttonContent}
         >
@@ -44,7 +44,7 @@ export default function WelcomeScreen() {
 
         <PaperButton
           mode="contained-tonal"
-          // onPress={() => router.push("/(public)/signup")}
+          onPress={() => router.push("/signup")}
           style={styles.button}
           contentStyle={styles.buttonContent}
         >

@@ -22,13 +22,13 @@ export const welcomeStyles = StyleSheet.create({
         paddingHorizontal: spacing.lg,
     },
     middle: {
-        flex: 1, // ocupa o centro
+        flex: 1,
         alignItems: "center",
         justifyContent: "center",
     },
     actions: {
         width: "100%",
-        paddingBottom: spacing['5xl'], // joga os botões mais pra baixo
+        paddingBottom: spacing['5xl'],
     },
     button: { borderRadius: 10 },
     buttonContent: { paddingVertical: spacing.md },
