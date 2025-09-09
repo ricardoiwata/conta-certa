@@ -41,3 +41,8 @@ app-example
 
 package-lock.json
 
+# Variáveis de ambiente
+.env
+.env.local
+.env.*
+
