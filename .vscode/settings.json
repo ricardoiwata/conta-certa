@@ -1,8 +1,0 @@
-{
-  // Point VS Code Jest to the frontend package
-  "jest.rootPath": "frontend",
-  // Use the package script inside frontend to run Jest
-  "jest.jestCommandLine": "npm test --",
-  // Optional: run tests in watch mode
-  "jest.runMode": "watch"
-}
