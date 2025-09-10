@@ -1,1 +1,0 @@
-export const DESPESA_REPOSITORY = Symbol('DESPESA_REPOSITORY');

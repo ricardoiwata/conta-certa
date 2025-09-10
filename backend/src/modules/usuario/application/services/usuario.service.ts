@@ -1,36 +1,42 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Usuario } from '../../domain/entities/usuario.entity';
 import { CreateUsuarioDto } from '../dto/create-usuario.dto';
 import { UpdateUsuarioDto } from '../dto/update-usuario.dto';
-import { IUsuarioRepository } from '../../domain/repositories/usuario.repository';
-import { USUARIO_REPOSITORY } from '../../domain/repositories/tokens';
 
 @Injectable()
 export class UsuarioService {
   constructor(
-    @Inject(USUARIO_REPOSITORY)
-    private readonly repo: IUsuarioRepository,
+    @InjectRepository(Usuario)
+    private readonly usuarioRepository: Repository<Usuario>,
   ) {}
 
-  create(createUsuarioDto: CreateUsuarioDto) {
-    return this.repo.create({
-      nome: createUsuarioDto.nome,
-      email: createUsuarioDto.email,
-    });
+  async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
+    const usuario = this.usuarioRepository.create(createUsuarioDto);
+    return this.usuarioRepository.save(usuario);
   }
 
-  findAll() {
-    return this.repo.findAll();
+  async findAll(): Promise<Usuario[]> {
+    return this.usuarioRepository.find();
   }
 
-  findOne(id: number) {
-    return this.repo.findById(id);
+  async findOne(id: number): Promise<Usuario | null> {
+    return this.usuarioRepository.findOneBy({ id });
   }
 
-  update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
-    return this.repo.update(id, updateUsuarioDto);
+  async update(
+    id: number,
+    updateUsuarioDto: UpdateUsuarioDto,
+  ): Promise<Usuario | null> {
+    await this.usuarioRepository.update(id, updateUsuarioDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return this.repo.remove(id);
+  async remove(id: number): Promise<void> {
+    const result = await this.usuarioRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Usuario #${id} não encontrado`);
+    }
   }
 }

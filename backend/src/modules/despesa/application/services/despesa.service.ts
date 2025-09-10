@@ -1,46 +1,42 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Despesa } from '../../domain/entities/despesa.entity';
 import { CreateDespesaDto } from '../dto/create-despesa.dto';
 import { UpdateDespesaDto } from '../dto/update-despesa.dto';
-import { IDespesaRepository } from '../../domain/repositories/despesa.repository';
-import { DESPESA_REPOSITORY } from '../../domain/repositories/tokens';
-import { Despesa } from '../../domain/entities/despesa';
 
 @Injectable()
 export class DespesaService {
   constructor(
-    @Inject(DESPESA_REPOSITORY)
-    private readonly repo: IDespesaRepository,
+    @InjectRepository(Despesa)
+    private readonly despesaRepository: Repository<Despesa>,
   ) {}
 
-  create(createDespesaDto: CreateDespesaDto) {
-    const data = {
-      descricao: createDespesaDto.descricao,
-      valor: createDespesaDto.valor,
-      data: new Date(createDespesaDto.data),
-      usuarioId: createDespesaDto.usuarioId,
-    };
-    return this.repo.create(data);
+  async create(createDespesaDto: CreateDespesaDto): Promise<Despesa> {
+    const despesa = this.despesaRepository.create(createDespesaDto);
+    return this.despesaRepository.save(despesa);
   }
 
-  findAll() {
-    return this.repo.findAll();
+  async findAll(): Promise<Despesa[]> {
+    return this.despesaRepository.find();
   }
 
-  findOne(id: number) {
-    return this.repo.findById(id);
+  async findOne(id: number): Promise<Despesa | null> {
+    return this.despesaRepository.findOneBy({ id });
   }
 
-  update(id: number, updateDespesaDto: UpdateDespesaDto) {
-    const payload: Partial<Omit<Despesa, 'id'>> = {
-      descricao: updateDespesaDto.descricao,
-      valor: updateDespesaDto.valor,
-      data: updateDespesaDto.data ? new Date(updateDespesaDto.data) : undefined,
-      usuarioId: updateDespesaDto.usuarioId,
-    };
-    return this.repo.update(id, payload);
+  async update(
+    id: number,
+    updateDespesaDto: UpdateDespesaDto,
+  ): Promise<Despesa | null> {
+    await this.despesaRepository.update(id, updateDespesaDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return this.repo.remove(id);
+  async remove(id: number): Promise<void> {
+    const result = await this.despesaRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Despesa #${id} não encontrado`);
+    }
   }
 }
