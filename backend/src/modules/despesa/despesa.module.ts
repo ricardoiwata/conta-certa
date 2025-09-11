@@ -1,15 +1,12 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Despesa } from './domain/entities/despesa.entity';
 import { DespesaService } from './application/services/despesa.service';
 import { DespesaController } from './presentation/http/despesa.controller';
-import { DESPESA_REPOSITORY } from './domain/repositories/tokens';
-import { InMemoryDespesaRepository } from './infrastructure/persistence/in-memory/despesa.repository.memory';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([Despesa])],
   controllers: [DespesaController],
-  providers: [
-    DespesaService,
-    { provide: DESPESA_REPOSITORY, useClass: InMemoryDespesaRepository },
-  ],
-  exports: [],
+  providers: [DespesaService],
 })
 export class DespesaModule {}

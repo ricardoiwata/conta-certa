@@ -1,15 +1,12 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Usuario } from './domain/entities/usuario.entity';
 import { UsuarioService } from './application/services/usuario.service';
 import { UsuarioController } from './presentation/http/usuario.controller';
-import { USUARIO_REPOSITORY } from './domain/repositories/tokens';
-import { InMemoryUsuarioRepository } from './infrastructure/persistence/in-memory/usuario.repository.memory';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([Usuario])],
   controllers: [UsuarioController],
-  providers: [
-    UsuarioService,
-    { provide: USUARIO_REPOSITORY, useClass: InMemoryUsuarioRepository },
-  ],
-  exports: [],
+  providers: [UsuarioService],
 })
 export class UsuarioModule {}
