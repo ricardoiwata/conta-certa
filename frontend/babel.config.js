@@ -4,16 +4,17 @@ module.exports = function (api) {
     presets: ["babel-preset-expo"],
     plugins: [
       [
-        "module:react-native-dotenv",
+        "module-resolver",
         {
-          moduleName: "@env",
-          path: ".env",
-          blocklist: null,
-          allowlist: null,
-          safe: false,
-          allowUndefined: true,
+          root: ["."],
+          alias: {
+            "@": "./src",
+          },
+          extensions: [".ios.js", ".android.js", ".js", ".ts", ".tsx", ".json"],
         },
       ],
+      // Must be last according to Worklets/Reanimated docs
+      "react-native-worklets/plugin",
     ],
   };
 };
