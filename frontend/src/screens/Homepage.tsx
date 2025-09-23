@@ -14,6 +14,7 @@ import {
   Text,
   useTheme,
 } from "react-native-paper";
+import { dashboardData } from "@/data/dashboard";
 
 export default function Homepage() {
   const { user, loading } = useAuth();
@@ -45,54 +46,35 @@ export default function Homepage() {
 
   const displayName = user?.displayName || user?.email || "Usuário";
 
-  const balance = 1520.75;
-  const labels = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"];
-  const receita = [1200, 1350, 1100, 1600, 1450, 1700];
-  const despesa = [800, 950, 900, 1000, 1100, 1200];
+  const {
+    balance,
+    labels,
+    receita,
+    despesa,
+    totalReceitasRecebidas,
+    totalDespesasPagas,
+    receitasPendentes,
+    despesasPendentes,
+    proximos7Dias,
+    alertas,
+    categorias,
+    notificacoes,
+    dica,
+  } = dashboardData;
 
   const screenWidth = Dimensions.get("window").width;
   const horizontalPadding = 16; // tighter horizontal padding
 
   // Mock domain data (replace with real queries later)
-  const totalReceitasRecebidas = 8450;
-  const totalDespesasPagas = 5120;
-  const receitasPendentes = 1550;
-  const despesasPendentes = 2300;
   const projecaoSaldoFinal = balance + receitasPendentes - despesasPendentes;
 
-  const proximos7Dias = [
-    { id: "1", tipo: "Despesa", titulo: "Conta de Luz", data: "Amanhã", valor: 120.4 },
-    { id: "2", tipo: "Despesa", titulo: "Internet", data: "Em 2 dias", valor: 99.9 },
-    { id: "3", tipo: "Receita", titulo: "Salário", data: "Em 5 dias", valor: 3200 },
-  ];
-
-  const alertas = [
-    { id: "a1", tipo: "warning", texto: "Você atingiu 80% do orçamento de Lazer" },
-    { id: "a2", tipo: "alert", texto: "Conta de internet vence em 2 dias" },
-  ];
-
-  const categorias = [
-    { nome: "Alimentação", valor: 860 },
-    { nome: "Transporte", valor: 420 },
-    { nome: "Moradia", valor: 1450 },
-    { nome: "Lazer", valor: 310 },
-    { nome: "Saúde", valor: 220 },
-  ];
   const totalCategorias = categorias.reduce((acc, c) => acc + c.valor, 0) || 1;
-
-  const notificacoes = [
-    { id: "n1", texto: "Você atingiu 80% do orçamento de lazer" },
-    { id: "n2", texto: "Conta de luz vence amanhã" },
-    { id: "n3", texto: "Cashback de R$ 15 disponível" },
-  ];
-
-  const dica = "Este mês você gastou 18% a mais em transporte que no anterior.";
 
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
         contentContainerStyle={{
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + 12,
           paddingBottom: insets.bottom + 96,
           paddingHorizontal: horizontalPadding,
           gap: 12,
@@ -118,7 +100,10 @@ export default function Homepage() {
         </View>
 
         {/* Saldo atual */}
-        <Card>
+        <Card
+          testID="balance-card"
+          onPress={() => router.push("/details/balance")}
+        >
           <Card.Content>
             <Text variant="titleSmall" style={{ opacity: 0.7 }}>
               Saldo atual
@@ -133,27 +118,45 @@ export default function Homepage() {
         </Card>
 
         {/* Resumo rápido do mês */}
-        <Card>
+        <Card
+          testID="summary-card"
+          onPress={() => router.push("/details/summary")}
+        >
           <Card.Title title="Resumo do mês" titleVariant="titleMedium" />
           <Card.Content style={{ gap: 12 }}>
             <View style={{ flexDirection: "row", gap: 12 }}>
               <View style={{ flex: 1 }}>
                 <Text style={{ opacity: 0.7 }}>Receitas recebidas</Text>
-                <Text variant="titleLarge" style={{ color: theme.colors.primary, fontWeight: "700" }}>
-                  {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalReceitasRecebidas)}
+                <Text
+                  variant="titleLarge"
+                  style={{ color: theme.colors.primary, fontWeight: "700" }}
+                >
+                  {new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(totalReceitasRecebidas)}
                 </Text>
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ opacity: 0.7 }}>Despesas pagas</Text>
-                <Text variant="titleLarge" style={{ color: theme.colors.error, fontWeight: "700" }}>
-                  {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalDespesasPagas)}
+                <Text
+                  variant="titleLarge"
+                  style={{ color: theme.colors.error, fontWeight: "700" }}
+                >
+                  {new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(totalDespesasPagas)}
                 </Text>
               </View>
             </View>
             <View>
               <Text style={{ opacity: 0.7 }}>Projeção do saldo final</Text>
               <Text variant="headlineMedium" style={{ fontWeight: "700" }}>
-                {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(projecaoSaldoFinal)}
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(projecaoSaldoFinal)}
               </Text>
               <Text style={{ opacity: 0.6, marginTop: 4 }}>
                 Considerando receitas/ despesas pendentes deste mês
@@ -163,7 +166,10 @@ export default function Homepage() {
         </Card>
 
         {/* Receita x Despesa (linha) */}
-        <Card>
+        <Card
+          testID="income-vs-expense-card"
+          onPress={() => router.push("/details/income-vs-expense")}
+        >
           <Card.Title title="Receita x Despesa" titleVariant="titleMedium" />
           <Card.Content>
             <LineChart
@@ -211,18 +217,28 @@ export default function Homepage() {
         </Card>
 
         {/* Próximos eventos financeiros (7 dias) */}
-        <Card>
+        <Card
+          testID="upcoming-card"
+          onPress={() => router.push("/details/upcoming")}
+        >
           <Card.Title title="Próximos 7 dias" titleVariant="titleMedium" />
           <Card.Content>
             {proximos7Dias.map((item) => (
               <List.Item
                 key={item.id}
-                title={`${item.titulo} · ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(item.valor)}`}
+                title={`${item.titulo} · ${new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(item.valor)}`}
                 description={item.data}
                 left={(props) => (
                   <List.Icon
                     {...props}
-                    color={item.tipo === "Receita" ? theme.colors.primary : theme.colors.error}
+                    color={
+                      item.tipo === "Receita"
+                        ? theme.colors.primary
+                        : theme.colors.error
+                    }
                     icon={item.tipo === "Receita" ? "cash-plus" : "cash-minus"}
                   />
                 )}
@@ -232,7 +248,10 @@ export default function Homepage() {
         </Card>
 
         {/* Alertas de contas/limite */}
-        <Card>
+        <Card
+          testID="alerts-card"
+          onPress={() => router.push("/details/alerts")}
+        >
           <Card.Title title="Alertas" titleVariant="titleMedium" />
           <Card.Content>
             {alertas.map((a) => (
@@ -243,7 +262,11 @@ export default function Homepage() {
                   <List.Icon
                     {...props}
                     icon={a.tipo === "warning" ? "alert" : "bell-alert"}
-                    color={a.tipo === "warning" ? theme.colors.tertiary : theme.colors.error}
+                    color={
+                      a.tipo === "warning"
+                        ? theme.colors.tertiary
+                        : theme.colors.error
+                    }
                   />
                 )}
               />
@@ -252,17 +275,31 @@ export default function Homepage() {
         </Card>
 
         {/* Top categorias de gastos (ranking) */}
-        <Card>
-          <Card.Title title="Top categorias de gastos" titleVariant="titleMedium" />
+        <Card
+          testID="categories-card"
+          onPress={() => router.push("/details/categories")}
+        >
+          <Card.Title
+            title="Top categorias de gastos"
+            titleVariant="titleMedium"
+          />
           <Card.Content style={{ gap: 8 }}>
             {categorias.map((c) => {
               const pct = c.valor / totalCategorias;
               return (
                 <View key={c.nome} style={{ gap: 4 }}>
-                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                    }}
+                  >
                     <Text>{c.nome}</Text>
                     <Text style={{ opacity: 0.7 }}>
-                      {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(c.valor)}
+                      {new Intl.NumberFormat("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      }).format(c.valor)}
                     </Text>
                   </View>
                   <ProgressBar progress={pct} color={theme.colors.error} />
@@ -273,22 +310,31 @@ export default function Homepage() {
         </Card>
 
         {/* Notificações recentes */}
-        <Card>
+        <Card
+          testID="notifications-card"
+          onPress={() => router.push("/details/notifications")}
+        >
           <Card.Title title="Notificações" titleVariant="titleMedium" />
           <Card.Content>
             {notificacoes.slice(0, 3).map((n) => (
-              <List.Item key={n.id} title={n.texto} left={(props) => <List.Icon {...props} icon="bell" />} />
+              <List.Item
+                key={n.id}
+                title={n.texto}
+                left={(props) => <List.Icon {...props} icon="bell" />}
+              />
             ))}
           </Card.Content>
         </Card>
 
         {/* Dicas financeiras */}
-        <Card>
+        <Card testID="tip-card" onPress={() => router.push("/details/tip")}>
           <Card.Title title="Dica financeira" titleVariant="titleMedium" />
           <Card.Content>
             <List.Item
               title={dica}
-              left={(props) => <List.Icon {...props} icon="lightbulb-on-outline" />}
+              left={(props) => (
+                <List.Icon {...props} icon="lightbulb-on-outline" />
+              )}
             />
           </Card.Content>
         </Card>
