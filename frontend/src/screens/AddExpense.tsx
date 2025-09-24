@@ -1,9 +1,22 @@
 import React, { useMemo, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
-import { Appbar, Button, HelperText, Snackbar, Switch, Text, TextInput, Menu } from "react-native-paper";
+import {
+  Appbar,
+  Button,
+  HelperText,
+  Snackbar,
+  Switch,
+  Text,
+  TextInput,
+  Menu,
+} from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Despesa, parseDateFromInput, parseValorFromInput } from "@/domain/Transacao";
+import {
+  Despesa,
+  parseDateFromInput,
+  parseValorFromInput,
+} from "@/domain/Transacao";
 import { CATEGORIAS_GASTOS } from "@/domain/categorias";
 import { useAuth } from "@/auth/AuthContext";
 
@@ -12,7 +25,6 @@ export default function AddExpense() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
 
-  // Form state
   const [categoriaId, setCategoriaId] = useState<number | null>(null);
   const [categoriaOpen, setCategoriaOpen] = useState(false);
   const [descricao, setDescricao] = useState("");
@@ -26,7 +38,8 @@ export default function AddExpense() {
   const [error, setError] = useState<string | null>(null);
   const [snack, setSnack] = useState<string | null>(null);
   const disableSubmit = useMemo(
-    () => !descricao || !valor || !data || !dataCompetencia || categoriaId == null,
+    () =>
+      !descricao || !valor || !data || !dataCompetencia || categoriaId == null,
     [descricao, valor, data, dataCompetencia, categoriaId]
   );
 
@@ -36,14 +49,15 @@ export default function AddExpense() {
       const v = parseValorFromInput(valor);
       const d1 = parseDateFromInput(data);
       const d2 = parseDateFromInput(dataCompetencia);
-      if (!Number.isFinite(v) || v <= 0) throw new Error("Informe um valor válido (> 0)");
+      if (!Number.isFinite(v) || v <= 0)
+        throw new Error("Informe um valor válido (> 0)");
       if (!d1) throw new Error("Data inválida (use AAAA-MM-DD)");
       if (!d2) throw new Error("Data de competência inválida (use AAAA-MM-DD)");
 
-      const idUsuario = user?.uid ? 1 : 1; // placeholder local
+      const idUsuario = user?.uid ? 1 : 1;
       const d = new Despesa(
         idUsuario,
-        1, // idConta removido (placeholder)
+        1,
         categoriaId || 1,
         descricao,
         v,
@@ -51,7 +65,7 @@ export default function AddExpense() {
         d2,
         ehRecorrente,
         observacao || undefined,
-        realizada,
+        realizada
       );
 
       console.log("Despesa criada:", d);
@@ -68,25 +82,79 @@ export default function AddExpense() {
         <Appbar.Content title="Nova Despesa" />
       </Appbar.Header>
 
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.select({ ios: "padding", android: undefined })}>
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 32, gap: 12 }}>
-          <TextInput label="Descrição" value={descricao} onChangeText={setDescricao} mode="outlined" returnKeyType="next" />
-          <HelperText type="info">Ex.: Mercado, transporte, moradia…</HelperText>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.select({ ios: "padding", android: undefined })}
+      >
+        <ScrollView
+          contentContainerStyle={{
+            padding: 16,
+            paddingBottom: insets.bottom + 32,
+            gap: 12,
+          }}
+        >
+          <TextInput
+            label="Descrição"
+            value={descricao}
+            onChangeText={setDescricao}
+            mode="outlined"
+            returnKeyType="next"
+          />
+          <HelperText type="info">
+            Ex.: Mercado, transporte, moradia…
+          </HelperText>
 
-          <TextInput label="Valor" value={valor} onChangeText={setValor} mode="outlined" keyboardType="decimal-pad" returnKeyType="next" />
+          <TextInput
+            label="Valor"
+            value={valor}
+            onChangeText={setValor}
+            mode="outlined"
+            keyboardType="decimal-pad"
+            returnKeyType="next"
+          />
           <HelperText type="info">Use ponto ou vírgula. Ex.: 89,90</HelperText>
 
-          <TextInput label="Data (AAAA-MM-DD)" value={data} onChangeText={setData} mode="outlined" returnKeyType="next" />
-          <TextInput label="Competência (AAAA-MM-DD)" value={dataCompetencia} onChangeText={setDataCompetencia} mode="outlined" returnKeyType="next" />
+          <TextInput
+            label="Data (AAAA-MM-DD)"
+            value={data}
+            onChangeText={setData}
+            mode="outlined"
+            returnKeyType="next"
+          />
+          <TextInput
+            label="Competência (AAAA-MM-DD)"
+            value={dataCompetencia}
+            onChangeText={setDataCompetencia}
+            mode="outlined"
+            returnKeyType="next"
+          />
 
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             <Text>É recorrente?</Text>
             <Switch value={ehRecorrente} onValueChange={setEhRecorrente} />
           </View>
 
-          <TextInput label="Observação (opcional)" value={observacao} onChangeText={setObservacao} mode="outlined" multiline />
+          <TextInput
+            label="Observação (opcional)"
+            value={observacao}
+            onChangeText={setObservacao}
+            mode="outlined"
+            multiline
+          />
 
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             <Text>Marcada como realizada</Text>
             <Switch value={realizada} onValueChange={setRealizada} />
           </View>
@@ -98,7 +166,9 @@ export default function AddExpense() {
               <Button mode="outlined" onPress={() => setCategoriaOpen(true)}>
                 {categoriaId == null
                   ? "Selecionar categoria (gasto)"
-                  : `Categoria: ${CATEGORIAS_GASTOS.find((c) => c.id === categoriaId)?.nome}`}
+                  : `Categoria: ${
+                      CATEGORIAS_GASTOS.find((c) => c.id === categoriaId)?.nome
+                    }`}
               </Button>
             }
           >
@@ -113,15 +183,31 @@ export default function AddExpense() {
               />
             ))}
           </Menu>
-          <HelperText type="info">Categorias de gastos (pré-definidas)</HelperText>
+          <HelperText type="info">
+            Categorias de gastos (pré-definidas)
+          </HelperText>
 
-          {!!error && <HelperText type="error" visible>{error}</HelperText>}
+          {!!error && (
+            <HelperText type="error" visible>
+              {error}
+            </HelperText>
+          )}
 
-          <Button mode="contained" onPress={handleSave} disabled={disableSubmit}>Salvar</Button>
+          <Button
+            mode="contained"
+            onPress={handleSave}
+            disabled={disableSubmit}
+          >
+            Salvar
+          </Button>
         </ScrollView>
       </KeyboardAvoidingView>
 
-      <Snackbar visible={!!snack} onDismiss={() => setSnack(null)} duration={2000}>
+      <Snackbar
+        visible={!!snack}
+        onDismiss={() => setSnack(null)}
+        duration={2000}
+      >
         {snack}
       </Snackbar>
     </View>

@@ -63,9 +63,8 @@ export default function Homepage() {
   } = dashboardData;
 
   const screenWidth = Dimensions.get("window").width;
-  const horizontalPadding = 16; // tighter horizontal padding
+  const horizontalPadding = 16;
 
-  // Mock domain data (replace with real queries later)
   const projecaoSaldoFinal = balance + receitasPendentes - despesasPendentes;
 
   const totalCategorias = categorias.reduce((acc, c) => acc + c.valor, 0) || 1;
@@ -80,7 +79,6 @@ export default function Homepage() {
           gap: 12,
         }}
       >
-        {/* Top bar: greeting + profile button */}
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <View style={{ flex: 1 }}>
             <Text variant="titleLarge" style={{ fontWeight: "700" }}>
@@ -98,8 +96,6 @@ export default function Homepage() {
             containerColor={theme.colors.elevation.level2}
           />
         </View>
-
-        {/* Saldo atual */}
         <Card
           testID="balance-card"
           onPress={() => router.push("/details/balance")}
@@ -117,7 +113,6 @@ export default function Homepage() {
           </Card.Content>
         </Card>
 
-        {/* Resumo rápido do mês */}
         <Card
           testID="summary-card"
           onPress={() => router.push("/details/summary")}
@@ -165,7 +160,6 @@ export default function Homepage() {
           </Card.Content>
         </Card>
 
-        {/* Receita x Despesa (linha) */}
         <Card
           testID="income-vs-expense-card"
           onPress={() => router.push("/details/income-vs-expense")}
@@ -216,7 +210,6 @@ export default function Homepage() {
           </Card.Content>
         </Card>
 
-        {/* Próximos eventos financeiros (7 dias) */}
         <Card
           testID="upcoming-card"
           onPress={() => router.push("/details/upcoming")}
@@ -247,7 +240,6 @@ export default function Homepage() {
           </Card.Content>
         </Card>
 
-        {/* Alertas de contas/limite */}
         <Card
           testID="alerts-card"
           onPress={() => router.push("/details/alerts")}
@@ -274,7 +266,6 @@ export default function Homepage() {
           </Card.Content>
         </Card>
 
-        {/* Top categorias de gastos (ranking) */}
         <Card
           testID="categories-card"
           onPress={() => router.push("/details/categories")}
@@ -309,7 +300,6 @@ export default function Homepage() {
           </Card.Content>
         </Card>
 
-        {/* Notificações recentes */}
         <Card
           testID="notifications-card"
           onPress={() => router.push("/details/notifications")}
@@ -326,7 +316,6 @@ export default function Homepage() {
           </Card.Content>
         </Card>
 
-        {/* Dicas financeiras */}
         <Card testID="tip-card" onPress={() => router.push("/details/tip")}>
           <Card.Title title="Dica financeira" titleVariant="titleMedium" />
           <Card.Content>
@@ -339,11 +328,9 @@ export default function Homepage() {
           </Card.Content>
         </Card>
 
-        {/* Espaço extra para não colidir com FABs */}
         <View style={{ height: 8 }} />
       </ScrollView>
 
-      {/* Fixed CTA FABs */}
       {fabVisible && (
         <View
           pointerEvents="box-none"
