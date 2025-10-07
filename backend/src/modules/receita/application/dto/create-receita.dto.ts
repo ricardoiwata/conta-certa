@@ -10,7 +10,7 @@ import {
   MaxLength,
 } from 'class-validator';
 
-export class CreateDespesaDto {
+export class CreateReceitaDto {
   @IsString()
   @MaxLength(128)
   descricao: string;
@@ -21,7 +21,6 @@ export class CreateDespesaDto {
 
   @IsDateString()
   @Transform(({ value }) => {
-    // Se vier no formato dd/mm/yyyy, converte para yyyy-mm-dd
     if (typeof value === 'string' && value.includes('/')) {
       const [day, month, year] = value.split('/');
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
@@ -30,14 +29,18 @@ export class CreateDespesaDto {
   })
   data: string;
 
+  @IsDateString()
+  @Transform(({ value }) => {
+    if (typeof value === 'string' && value.includes('/')) {
+      const [day, month, year] = value.split('/');
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+    return value;
+  })
+  dataCompetencia: string;
+
   @IsString()
-  formaPagamento:
-    | 'Débito'
-    | 'Cheque'
-    | 'Crédito'
-    | 'Pix'
-    | 'Dinheiro'
-    | 'Boleto';
+  origem: 'Fixo' | 'Variável';
 
   @IsBoolean()
   recorrentePai: boolean;
@@ -51,8 +54,4 @@ export class CreateDespesaDto {
   @IsNumber()
   @IsNotEmpty()
   usuarioId: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  categoriaId: number;
 }
