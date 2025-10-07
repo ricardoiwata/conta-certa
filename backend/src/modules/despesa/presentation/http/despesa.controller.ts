@@ -24,6 +24,15 @@ export class DespesaController {
   findAll() {
     return this.despesaService.findAll();
   }
+  @Get('/recorrentes')
+  findAllRecorrentes() {
+    return this.despesaService.findAllRecorrentes();
+  }
+
+  @Get('/recorrentes/:id')
+  findAllRecorrentesFilhas(@Param('id') id: string) {
+    return this.despesaService.findAllRecorrentesFilhas(+id);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

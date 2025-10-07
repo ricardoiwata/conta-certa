@@ -1,0 +1,322 @@
+### ------------------------------------------------------------------ DESPESAS ------------------------------------------------------------------
+
+### GET ALL despesas
+GET http://localhost:3000/despesa
+
+### GET despesas recorrentes (recorrentePai = true)
+GET http://localhost:3000/despesa/recorrentes
+
+### GET despesas filhas de uma recorrente específica
+GET http://localhost:3000/despesa/recorrentes/2
+
+### GET despesa por ID
+GET http://localhost:3000/despesa/1
+
+### POST - Criar nova despesa
+POST http://localhost:3000/despesa
+Content-Type: application/json
+
+{
+    "descricao": "Compra de supermercado",
+    "valor": 150.75,
+    "data": "10/09/2025",
+    "formaPagamento": "Pix",
+    "recorrentePai": false,
+    "recorrentePaiId": 0,
+    "realizada": true,
+    "usuarioId": 1,
+    "categoriaId": 1
+}
+
+### POST - Criar despesa recorrente PAI
+POST http://localhost:3000/despesa
+Content-Type: application/json
+
+{
+    "descricao": "Aluguel mensal",
+    "valor": 1200.00,
+    "data": "05/10/2025",
+    "formaPagamento": "Débito",
+    "recorrentePai": true,
+    "recorrentePaiId": 0,
+    "realizada": true,
+    "usuarioId": 1,
+    "categoriaId": 6
+}
+
+### POST - Criar despesa recorrente FILHA
+POST http://localhost:3000/despesa
+Content-Type: application/json
+
+{
+    "descricao": "Aluguel janeiro",
+    "valor": 1200.00,
+    "data": "05/01/2026",
+    "formaPagamento": "Débito",
+    "recorrentePai": false,
+    "recorrentePaiId": 2,
+    "realizada": false,
+    "usuarioId": 1,
+    "categoriaId": 6
+}
+
+### PATCH - Atualizar despesa
+PATCH http://localhost:3000/despesa/1
+Content-Type: application/json
+
+{
+    "descricao": "Compra de supermercado atualizada",
+    "valor": 175.50,
+    "data": "12/09/2025",
+    "formaPagamento": "Crédito",
+    "realizada": false
+}
+
+### PATCH - Marcar despesa como realizada
+PATCH http://localhost:3000/despesa/3
+Content-Type: application/json
+
+{
+    "realizada": true
+}
+
+### DELETE - Deletar despesa
+DELETE http://localhost:3000/despesa/1
+
+### TESTE DE ERROS DESPESAS
+
+### GET despesa inexistente (deve retornar 404)
+GET http://localhost:3000/despesa/999
+
+### POST com usuário inexistente (deve retornar 404)
+POST http://localhost:3000/despesa
+Content-Type: application/json
+
+{
+    "descricao": "Teste erro usuário",
+    "valor": 100.00,
+    "data": "10/09/2025",
+    "formaPagamento": "Pix",
+    "recorrentePai": false,
+    "recorrentePaiId": 0,
+    "realizada": true,
+    "usuarioId": 999,
+    "categoriaId": 1
+}
+
+### POST com categoria inexistente (deve retornar 404)
+POST http://localhost:3000/despesa
+Content-Type: application/json
+
+{
+    "descricao": "Teste erro categoria",
+    "valor": 100.00,
+    "data": "10/09/2025",
+    "formaPagamento": "Pix",
+    "recorrentePai": false,
+    "recorrentePaiId": 0,
+    "realizada": true,
+    "usuarioId": 1,
+    "categoriaId": 999
+}
+
+### PATCH despesa inexistente (deve retornar 404)
+PATCH http://localhost:3000/despesa/999
+Content-Type: application/json
+
+{
+    "descricao": "Teste update inexistente"
+}
+
+### DELETE despesa inexistente (deve retornar 404)
+DELETE http://localhost:3000/despesa/999
+
+
+
+
+
+
+
+
+
+
+
+
+
+### ------------------------------------------------------------------ RECEITAS ------------------------------------------------------------------
+
+### GET ALL receitas
+GET http://localhost:3000/receita
+
+### GET receitas recorrentes (recorrentePai = true)
+GET http://localhost:3000/receita/recorrentes
+
+### GET receitas filhas de uma recorrente específica
+GET http://localhost:3000/receita/recorrentes/1
+
+### GET receita por ID
+GET http://localhost:3000/receita/1
+
+### POST - Criar nova receita
+POST http://localhost:3000/receita
+Content-Type: application/json
+
+{
+    "valor": 5000.00,
+    "data": "01/10/2025",
+    "dataCompetencia": "01/10/2025",
+    "descricao": "Salário outubro",
+    "origem": "Fixo",
+    "recorrentePai": false,
+    "recorrentePaiId": 0,
+    "realizada": true,
+    "usuarioId": 1
+}
+
+### POST - Criar receita recorrente PAI
+POST http://localhost:3000/receita
+Content-Type: application/json
+
+{
+    "valor": 5000.00,
+    "data": "01/10/2025",
+    "dataCompetencia": "01/10/2025",
+    "descricao": "Salário mensal",
+    "origem": "Fixo",
+    "recorrentePai": true,
+    "recorrentePaiId": 0,
+    "realizada": true,
+    "usuarioId": 1,
+}
+
+### POST - Criar receita recorrente FILHA
+POST http://localhost:3000/receita
+Content-Type: application/json
+
+{
+    "valor": 5000.00,
+    "data": "01/02/2026",
+    "dataCompetencia": "01/02/2026",
+    "descricao": "Salário fevereiro",
+    "origem": "Fixo",
+    "recorrentePai": false,
+    "recorrentePaiId": 2,
+    "realizada": false,
+    "usuarioId": 1
+}
+
+### POST - Criar receita variável
+POST http://localhost:3000/receita
+Content-Type: application/json
+
+{
+    "valor": 800.00,
+    "data": "01/02/2026",
+    "dataCompetencia": "01/02/2026",
+    "descricao": "Freelance desenvolvimento",
+    "origem": "Variável",
+    "recorrentePai": false,
+    "recorrentePaiId": 0,
+    "realizada": true,
+    "usuarioId": 1
+}
+
+### PATCH - Atualizar receita
+PATCH http://localhost:3000/receita/1
+Content-Type: application/json
+
+{
+    "descricao": "Salário outubro atualizado",
+    "valor": 5200.00,
+    "data": "01/10/2025",
+    "realizada": true
+}
+
+### PATCH - Marcar receita como realizada
+PATCH http://localhost:3000/receita/3
+Content-Type: application/json
+
+{
+    "realizada": true
+}
+
+### PATCH - Atualizar competência da receita
+PATCH http://localhost:3000/receita/1
+Content-Type: application/json
+
+{
+    "dataCompetencia": "02/10/2025"
+}
+
+### DELETE - Deletar receita
+DELETE http://localhost:3000/receita/4
+
+### TESTE DE ERROS RECEITAS
+
+### GET receita inexistente (deve retornar 404)
+GET http://localhost:3000/receita/999
+
+### POST com usuário inexistente (deve retornar 404)
+POST http://localhost:3000/receita
+Content-Type: application/json
+
+{
+    "valor": 1000.00,
+    "data": "10/10/2025",
+    "dataCompetencia": "10/10/2025",
+    "descricao": "Teste erro usuário",
+    "origem": "Fixo",
+    "recorrentePai": false,
+    "recorrentePaiId": 0,
+    "realizada": true,
+    "usuarioId": 999,
+    "categoriaId": 9
+}
+
+### POST com categoria inexistente (deve retornar 404)
+POST http://localhost:3000/receita
+Content-Type: application/json
+
+{
+    "valor": 1000.00,
+    "data": "10/10/2025",
+    "dataCompetencia": "10/10/2025",
+    "descricao": "Teste erro categoria",
+    "origem": "Fixo",
+    "recorrentePai": false,
+    "recorrentePaiId": 0,
+    "realizada": true,
+    "usuarioId": 1,
+    "categoriaId": 999
+}
+
+### PATCH receita inexistente (deve retornar 404)
+PATCH http://localhost:3000/receita/999
+Content-Type: application/json
+
+{
+    "descricao": "Teste update inexistente"
+}
+
+### DELETE receita inexistente (deve retornar 404)
+DELETE http://localhost:3000/receita/999
+
+
+
+
+
+
+
+
+
+
+
+
+
+### ------------------------------------------------------------------ CATEGORIAS ------------------------------------------------------------------
+
+### GET ALL categorias
+GET http://localhost:3000/categoria
+
+### GET BY ID categorias
+GET http://localhost:3000/categoria/1
