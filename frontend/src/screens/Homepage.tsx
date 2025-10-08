@@ -1,8 +1,15 @@
 import { useAuth } from "@/auth/AuthContext";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { Dimensions, ScrollView, View, Pressable, StyleSheet } from "react-native";
+import {
+  Dimensions,
+  ScrollView,
+  View,
+  Pressable,
+  StyleSheet,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { LineChart } from "react-native-chart-kit";
 import {
   ActivityIndicator,
@@ -17,6 +24,8 @@ import {
   Portal,
 } from "react-native-paper";
 import { dashboardData } from "@/data/dashboard";
+import { listReceitas, listReceitasRecorrentes } from "@/services/receitas";
+import { listDespesas, listDespesasRecorrentes } from "@/services/despesas";
 
 export default function Homepage() {
   const { user, loading } = useAuth();
@@ -39,6 +48,22 @@ export default function Homepage() {
   const theme = useTheme();
   const [fabVisible] = useState(true);
   const [fabOpen, setFabOpen] = useState(false);
+  const [chooseType, setChooseType] = useState<null | "income" | "expense">(
+    null
+  );
+  const [chooseRecurringStep, setChooseRecurringStep] = useState<null | "sub">(
+    null
+  );
+  const [hasIncomeRecurringParents, setHasIncomeRecurringParents] = useState<
+    boolean | null
+  >(null);
+  const [hasExpenseRecurringParents, setHasExpenseRecurringParents] = useState<
+    boolean | null
+  >(null);
+  const [summaryLoading, setSummaryLoading] = useState(true);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [receitas, setReceitas] = useState<any[]>([]);
+  const [despesas, setDespesas] = useState<any[]>([]);
 
   if (loading)
     return (
@@ -72,6 +97,95 @@ export default function Homepage() {
 
   const totalCategorias = categorias.reduce((acc, c) => acc + c.valor, 0) || 1;
 
+  // Recarrega resumo ao focar
+  useFocusEffect(
+    React.useCallback(() => {
+      (async () => {
+        try {
+          setSummaryError(null);
+          setSummaryLoading(true);
+          const [r, d] = await Promise.all([listReceitas(), listDespesas()]);
+          setReceitas(r || []);
+          setDespesas(d || []);
+        } catch (e: any) {
+          setSummaryError(e?.message || "Falha ao carregar resumo");
+        } finally {
+          setSummaryLoading(false);
+        }
+      })();
+      return () => {};
+    }, [])
+  );
+
+  useEffect(() => {
+    (async () => {
+      if (chooseRecurringStep != null) {
+        try {
+          const [rPais, dPais] = await Promise.all([
+            listReceitasRecorrentes().catch(() => []),
+            listDespesasRecorrentes().catch(() => []),
+          ]);
+          setHasIncomeRecurringParents((rPais || []).length > 0);
+          setHasExpenseRecurringParents((dPais || []).length > 0);
+        } catch {
+          setHasIncomeRecurringParents(null);
+          setHasExpenseRecurringParents(null);
+        }
+      }
+    })();
+  }, [chooseRecurringStep]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setSummaryError(null);
+        setSummaryLoading(true);
+        const [r, d] = await Promise.all([listReceitas(), listDespesas()]);
+        setReceitas(r || []);
+        setDespesas(d || []);
+      } catch (e: any) {
+        setSummaryError(e?.message || "Falha ao carregar resumo");
+      } finally {
+        setSummaryLoading(false);
+      }
+    })();
+  }, []);
+
+  function parseDateFlexible(s?: any): Date | null {
+    if (!s) return null;
+    if (typeof s === "string") {
+      if (s.includes("/")) {
+        const [dd, mm, yyyy] = s.split("/");
+        const d = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+        return isNaN(d.getTime()) ? null : d;
+      }
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    }
+    if (s instanceof Date) return s;
+    return null;
+  }
+
+  const now = new Date();
+  const m = now.getMonth();
+  const y = now.getFullYear();
+
+  const apiTotalReceitasRecebidas = receitas
+    .filter((x) => x.realizada)
+    .filter((x) => {
+      const d = parseDateFlexible(x.dataCompetencia || x.data);
+      return d && d.getMonth() === m && d.getFullYear() === y;
+    })
+    .reduce((acc, x) => acc + Number(x.valor || 0), 0);
+
+  const apiTotalDespesasPagas = despesas
+    .filter((x) => x.realizada)
+    .filter((x) => {
+      const d = parseDateFlexible(x.data);
+      return d && d.getMonth() === m && d.getFullYear() === y;
+    })
+    .reduce((acc, x) => acc + Number(x.valor || 0), 0);
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
@@ -91,13 +205,7 @@ export default function Homepage() {
               Bem-vindo(a) de volta
             </Text>
           </View>
-          <IconButton
-            icon="cash-multiple"
-            size={28}
-            mode="contained"
-            onPress={() => router.push("/receitas")}
-            containerColor={theme.colors.elevation.level2}
-          />
+          {/** Removed quick access to Receitas to restrict access via "Receita x Despesa" */}
           <IconButton
             icon="account-circle"
             size={28}
@@ -139,7 +247,7 @@ export default function Homepage() {
                   {new Intl.NumberFormat("pt-BR", {
                     style: "currency",
                     currency: "BRL",
-                  }).format(totalReceitasRecebidas)}
+                  }).format(apiTotalReceitasRecebidas)}
                 </Text>
               </View>
               <View style={{ flex: 1 }}>
@@ -151,7 +259,7 @@ export default function Homepage() {
                   {new Intl.NumberFormat("pt-BR", {
                     style: "currency",
                     currency: "BRL",
-                  }).format(totalDespesasPagas)}
+                  }).format(apiTotalDespesasPagas)}
                 </Text>
               </View>
             </View>
@@ -229,7 +337,7 @@ export default function Homepage() {
             {proximos7Dias.map((item) => (
               <List.Item
                 key={item.id}
-                title={`${item.titulo} · ${new Intl.NumberFormat("pt-BR", {
+                title={`${item.titulo}     ${new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 }).format(item.valor)}`}
@@ -346,7 +454,10 @@ export default function Homepage() {
           {fabOpen && (
             <Pressable
               onPress={() => setFabOpen(false)}
-              style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.82)" }]}
+              style={[
+                StyleSheet.absoluteFill,
+                { backgroundColor: "rgba(0,0,0,0.82)" },
+              ]}
             />
           )}
           <FAB.Group
@@ -357,25 +468,167 @@ export default function Homepage() {
               {
                 icon: "cash-plus",
                 label: "Receita",
-                onPress: () => router.push("/add-income"),
+                onPress: () => {
+                  setFabOpen(false);
+                  setChooseType("income");
+                },
                 color: theme.colors.primary,
-                labelStyle: { color: "#FFFFFF", fontWeight: "700", fontSize: 16 },
+                labelStyle: {
+                  color: "#FFFFFF",
+                  fontWeight: "700",
+                  fontSize: 16,
+                },
               },
               {
                 icon: "cash-minus",
                 label: "Despesa",
-                onPress: () => router.push("/add-expense"),
+                onPress: () => {
+                  setFabOpen(false);
+                  setChooseType("expense");
+                },
                 color: theme.colors.primary,
-                labelStyle: { color: "#FFFFFF", fontWeight: "700", fontSize: 16 },
+                labelStyle: {
+                  color: "#FFFFFF",
+                  fontWeight: "700",
+                  fontSize: 16,
+                },
               },
             ]}
             color={theme.colors.primary}
             onStateChange={({ open }) => setFabOpen(open)}
             backdropColor="transparent"
-            style={{ position: "absolute", bottom: Math.max(insets.bottom - 4, 0), right: 16 }}
+            style={{
+              position: "absolute",
+              bottom: Math.max(insets.bottom - 4, 0),
+              right: 16,
+            }}
           />
         </Portal>
       )}
+      <Portal>
+        {chooseType && (
+          <>
+            <Pressable
+              onPress={() => {
+                setChooseType(null);
+                setChooseRecurringStep(null);
+              }}
+              style={[
+                StyleSheet.absoluteFill,
+                { backgroundColor: "rgba(0,0,0,0.82)" },
+              ]}
+            />
+            <View
+              style={{
+                position: "absolute",
+                left: 16,
+                right: 16,
+                top: 0,
+                bottom: 0,
+                justifyContent: "center",
+              }}
+            >
+              <Card>
+                <Card.Content style={{ gap: 10, paddingVertical: 16 }}>
+                  <Text style={{ fontWeight: "700", padding: 20 }}>
+                    Como deseja cadastrar?
+                  </Text>
+                  <Button
+                    mode="contained"
+                    onPress={() => {
+                      setChooseType(null);
+                      if (chooseType === "income")
+                        router.push("/add-income-one-time");
+                      else router.push("/add-expense-one-time");
+                    }}
+                  >
+                    Não recorrente
+                  </Button>
+                  <Button
+                    mode="outlined"
+                    onPress={() => {
+                      setChooseRecurringStep(chooseType as any);
+                      setChooseType(null);
+                    }}
+                  >
+                    Recorrente
+                  </Button>
+                  <Button
+                    onPress={() => {
+                      setChooseType(null);
+                      setChooseRecurringStep(null);
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                </Card.Content>
+              </Card>
+            </View>
+          </>
+        )}
+      </Portal>
+      <Portal>
+        {chooseRecurringStep != null && (
+          <>
+            <Pressable
+              onPress={() => setChooseRecurringStep(null)}
+              style={[
+                StyleSheet.absoluteFill,
+                { backgroundColor: "rgba(0,0,0,0.82)" },
+              ]}
+            />
+            <View
+              style={{
+                position: "absolute",
+                left: 16,
+                right: 16,
+                top: 0,
+                bottom: 0,
+                justifyContent: "center",
+              }}
+            >
+              <Card>
+                <Card.Content style={{ gap: 10, paddingVertical: 16 }}>
+                  <Text style={{ fontWeight: "700", padding: 20 }}>
+                    Recorrente
+                  </Text>
+                  <Button
+                    mode="contained"
+                    onPress={() => {
+                      const t = chooseRecurringStep;
+                      setChooseRecurringStep(null);
+                      if (t === "income") router.push("/add-income-recurring");
+                      else router.push("/add-expense-recurring");
+                    }}
+                  >
+                    Recorrente nova
+                  </Button>
+                  <Button
+                    mode="outlined"
+                    disabled={
+                      chooseRecurringStep === "income"
+                        ? hasIncomeRecurringParents === false
+                        : hasExpenseRecurringParents === false
+                    }
+                    onPress={() => {
+                      const t = chooseRecurringStep;
+                      setChooseRecurringStep(null);
+                      if (t === "income")
+                        router.push("/add-income-recurring-child");
+                      else router.push("/add-expense-recurring-child");
+                    }}
+                  >
+                    Recorrente existente
+                  </Button>
+                  <Button onPress={() => setChooseRecurringStep(null)}>
+                    Voltar
+                  </Button>
+                </Card.Content>
+              </Card>
+            </View>
+          </>
+        )}
+      </Portal>
     </View>
   );
 }
