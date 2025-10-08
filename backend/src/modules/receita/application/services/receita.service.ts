@@ -4,31 +4,17 @@ import { Repository } from 'typeorm';
 import { CreateReceitaDto } from '../dto/create-receita.dto';
 import { UpdateReceitaDto } from '../dto/update-receita.dto';
 import { Receita } from '../../domain/entities/receita.entity';
-import { Usuario } from 'src/modules/usuario/domain/entities/usuario.entity';
-import { Categoria } from 'src/modules/categoria/domain/entities/categoria.entity';
 
 @Injectable()
 export class ReceitaService {
   constructor(
     @InjectRepository(Receita)
     private receitaRepository: Repository<Receita>,
-    @InjectRepository(Usuario)
-    private usuarioRepositorio: Repository<Usuario>,
   ) {}
 
   async create(createReceitaDto: CreateReceitaDto) {
-    const usuario = await this.usuarioRepositorio.findOne({
-      where: { id: createReceitaDto.usuarioId },
-    });
-
-    if (!usuario)
-      throw new NotFoundException(
-        `User com id #${createReceitaDto.usuarioId} não encontrado`,
-      );
-
     const receita = this.receitaRepository.create({
       ...createReceitaDto,
-      usuario,
       data: new Date(createReceitaDto.data),
     });
 
@@ -36,15 +22,12 @@ export class ReceitaService {
   }
 
   async findAll() {
-    return await this.receitaRepository.find({
-      relations: ['usuario', 'categoria'],
-    });
+    return await this.receitaRepository.find();
   }
 
   async findAllRecorrentes() {
     return await this.receitaRepository.find({
       where: { recorrentePai: true },
-      relations: ['categoria'],
     });
   }
 
@@ -55,10 +38,7 @@ export class ReceitaService {
   }
 
   async findOne(id: number) {
-    const receita = await this.receitaRepository.findOne({
-      where: { id },
-      relations: ['usuario', 'categoria'],
-    });
+    const receita = await this.receitaRepository.findOne({ where: { id } });
 
     if (!receita) throw new NotFoundException(`Receita #${id} não encontrada`);
 

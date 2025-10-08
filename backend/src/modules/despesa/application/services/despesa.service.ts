@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { CreateDespesaDto } from '../dto/create-despesa.dto';
 import { UpdateDespesaDto } from '../dto/update-despesa.dto';
 import { Despesa } from '../../domain/entities/despesa.entity';
-import { Usuario } from 'src/modules/usuario/domain/entities/usuario.entity';
 import { Categoria } from 'src/modules/categoria/domain/entities/categoria.entity';
 
 @Injectable()
@@ -12,22 +11,11 @@ export class DespesaService {
   constructor(
     @InjectRepository(Despesa)
     private despesaRepository: Repository<Despesa>,
-    @InjectRepository(Usuario)
-    private usuarioRepositorio: Repository<Usuario>,
     @InjectRepository(Categoria)
     private categoriaRepositorio: Repository<Categoria>,
   ) {}
 
   async create(createDespesaDto: CreateDespesaDto) {
-    const usuario = await this.usuarioRepositorio.findOne({
-      where: { id: createDespesaDto.usuarioId },
-    });
-
-    if (!usuario)
-      throw new NotFoundException(
-        `User com id #${createDespesaDto.usuarioId} não encontrado`,
-      );
-
     const categoria = await this.categoriaRepositorio.findOne({
       where: { id: createDespesaDto.categoriaId },
     });
@@ -40,7 +28,6 @@ export class DespesaService {
 
     const despesa = this.despesaRepository.create({
       ...createDespesaDto,
-      usuario,
       categoria,
       data: new Date(createDespesaDto.data),
     });
@@ -50,7 +37,7 @@ export class DespesaService {
 
   async findAll() {
     return await this.despesaRepository.find({
-      relations: ['usuario', 'categoria'],
+      relations: ['categoria'],
     });
   }
 
@@ -70,7 +57,7 @@ export class DespesaService {
   async findOne(id: number) {
     const despesa = await this.despesaRepository.findOne({
       where: { id },
-      relations: ['usuario', 'categoria'],
+      relations: ['categoria'],
     });
 
     if (!despesa) throw new NotFoundException(`Despesa #${id} não encontrada`);

@@ -12,13 +12,10 @@ import {
 } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  Despesa,
-  parseDateFromInput,
-  parseValorFromInput,
-} from "@/domain/Transacao";
-import { CATEGORIAS_GASTOS } from "@/domain/categorias";
+import { parseDateFromInput, parseValorFromInput } from "@/domain/Transacao";
 import { useAuth } from "@/auth/AuthContext";
+import { createDespesa } from "@/services/despesas";
+import { CATEGORIAS_GASTOS } from "@/domain/categorias";
 
 export default function AddExpense() {
   const router = useRouter();
@@ -38,38 +35,33 @@ export default function AddExpense() {
   const [error, setError] = useState<string | null>(null);
   const [snack, setSnack] = useState<string | null>(null);
   const disableSubmit = useMemo(
-    () =>
-      !descricao || !valor || !data || !dataCompetencia || categoriaId == null,
-    [descricao, valor, data, dataCompetencia, categoriaId]
+    () => !descricao || !valor || !data || categoriaId == null,
+    [descricao, valor, data, categoriaId]
   );
 
-  function handleSave() {
+  async function handleSave() {
     try {
       setError(null);
       const v = parseValorFromInput(valor);
       const d1 = parseDateFromInput(data);
-      const d2 = parseDateFromInput(dataCompetencia);
       if (!Number.isFinite(v) || v <= 0)
         throw new Error("Informe um valor válido (> 0)");
       if (!d1) throw new Error("Data inválida (use AAAA-MM-DD)");
-      if (!d2) throw new Error("Data de competência inválida (use AAAA-MM-DD)");
 
-      const idUsuario = user?.uid ? 1 : 1;
-      const d = new Despesa(
-        idUsuario,
-        1,
-        categoriaId || 1,
+      const idUsuario = user?.uid || "";
+      await createDespesa({
         descricao,
-        v,
-        d1,
-        d2,
-        ehRecorrente,
-        observacao || undefined,
-        realizada
-      );
-
-      console.log("Despesa criada:", d);
-      setSnack("Despesa cadastrada (preview)");
+        valor: v,
+        data: data,
+        formaPagamento: "Pix",
+        recorrentePai: !!ehRecorrente,
+        recorrentePaiId: 0,
+        realizada: !!realizada,
+        usuarioUid: idUsuario,
+        categoriaId: categoriaId || 1,
+      });
+      setSnack("Despesa cadastrada!");
+      setTimeout(() => router.back(), 600);
     } catch (e: any) {
       setError(e?.message || "Erro ao salvar");
     }

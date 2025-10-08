@@ -12,13 +12,10 @@ import {
 } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  Receita,
-  parseDateFromInput,
-  parseValorFromInput,
-} from "@/domain/Transacao";
+import { parseDateFromInput, parseValorFromInput } from "@/domain/Transacao";
 import { CATEGORIAS_GASTOS } from "@/domain/categorias";
 import { useAuth } from "@/auth/AuthContext";
+import { createReceita } from "@/services/receitas";
 
 export default function AddIncome() {
   const router = useRouter();
@@ -38,12 +35,11 @@ export default function AddIncome() {
   const [error, setError] = useState<string | null>(null);
   const [snack, setSnack] = useState<string | null>(null);
   const disableSubmit = useMemo(
-    () =>
-      !descricao || !valor || !data || !dataCompetencia || categoriaId == null,
-    [descricao, valor, data, dataCompetencia, categoriaId]
+    () => !descricao || !valor || !data || !dataCompetencia,
+    [descricao, valor, data, dataCompetencia]
   );
 
-  function handleSave() {
+  async function handleSave() {
     try {
       setError(null);
       const v = parseValorFromInput(valor);
@@ -54,22 +50,21 @@ export default function AddIncome() {
       if (!d1) throw new Error("Data inválida (use AAAA-MM-DD)");
       if (!d2) throw new Error("Data de competência inválida (use AAAA-MM-DD)");
 
-      const idUsuario = user?.uid ? 1 : 1;
-      const r = new Receita(
-        idUsuario,
-        1,
-        categoriaId || 1,
+      const idUsuario = user?.uid || "";
+      const origem = ehRecorrente ? "Fixo" : "Variável";
+      await createReceita({
         descricao,
-        v,
-        d1,
-        d2,
-        ehRecorrente,
-        observacao || undefined,
-        realizada
-      );
-
-      console.log("Receita criada:", r);
-      setSnack("Receita cadastrada (preview)");
+        valor: v,
+        data: data,
+        dataCompetencia: dataCompetencia,
+        origem,
+        recorrentePai: !!ehRecorrente,
+        recorrentePaiId: 0,
+        realizada: !!realizada,
+        usuarioUid: idUsuario,
+      });
+      setSnack("Receita cadastrada!");
+      setTimeout(() => router.back(), 600);
     } catch (e: any) {
       setError(e?.message || "Erro ao salvar");
     }
@@ -184,7 +179,7 @@ export default function AddIncome() {
             ))}
           </Menu>
           <HelperText type="info">
-            Categorias de gastos (pré-definidas)
+            Categorias de gastos (não usadas em receita)
           </HelperText>
 
           {!!error && (

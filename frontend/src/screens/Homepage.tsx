@@ -1,7 +1,7 @@
 import { useAuth } from "@/auth/AuthContext";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { Dimensions, ScrollView, View } from "react-native";
+import { Dimensions, ScrollView, View, Pressable, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LineChart } from "react-native-chart-kit";
 import {
@@ -13,6 +13,8 @@ import {
   Button,
   Text,
   useTheme,
+  FAB,
+  Portal,
 } from "react-native-paper";
 import { dashboardData } from "@/data/dashboard";
 
@@ -36,6 +38,7 @@ export default function Homepage() {
 
   const theme = useTheme();
   const [fabVisible] = useState(true);
+  const [fabOpen, setFabOpen] = useState(false);
 
   if (loading)
     return (
@@ -73,7 +76,7 @@ export default function Homepage() {
     <View style={{ flex: 1 }}>
       <ScrollView
         contentContainerStyle={{
-          paddingTop: insets.top + 12,
+          paddingTop: 12,
           paddingBottom: insets.bottom + 96,
           paddingHorizontal: horizontalPadding,
           gap: 12,
@@ -88,6 +91,13 @@ export default function Homepage() {
               Bem-vindo(a) de volta
             </Text>
           </View>
+          <IconButton
+            icon="cash-multiple"
+            size={28}
+            mode="contained"
+            onPress={() => router.push("/receitas")}
+            containerColor={theme.colors.elevation.level2}
+          />
           <IconButton
             icon="account-circle"
             size={28}
@@ -332,35 +342,39 @@ export default function Homepage() {
       </ScrollView>
 
       {fabVisible && (
-        <View
-          pointerEvents="box-none"
-          style={{
-            position: "absolute",
-            bottom: insets.bottom + 16,
-            left: horizontalPadding,
-            right: horizontalPadding,
-            flexDirection: "row",
-            justifyContent: "space-between",
-            gap: 12,
-          }}
-        >
-          <Button
-            mode="contained"
-            icon="cash-plus"
-            onPress={() => router.push("/add-income")}
-            style={{ flex: 1 }}
-          >
-            + Receita
-          </Button>
-          <Button
-            mode="contained"
-            icon="cash-minus"
-            onPress={() => router.push("/add-expense")}
-            style={{ flex: 1 }}
-          >
-            + Despesa
-          </Button>
-        </View>
+        <Portal>
+          {fabOpen && (
+            <Pressable
+              onPress={() => setFabOpen(false)}
+              style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.82)" }]}
+            />
+          )}
+          <FAB.Group
+            open={fabOpen}
+            visible
+            icon={fabOpen ? "close" : "plus"}
+            actions={[
+              {
+                icon: "cash-plus",
+                label: "Receita",
+                onPress: () => router.push("/add-income"),
+                color: theme.colors.primary,
+                labelStyle: { color: "#FFFFFF", fontWeight: "700", fontSize: 16 },
+              },
+              {
+                icon: "cash-minus",
+                label: "Despesa",
+                onPress: () => router.push("/add-expense"),
+                color: theme.colors.primary,
+                labelStyle: { color: "#FFFFFF", fontWeight: "700", fontSize: 16 },
+              },
+            ]}
+            color={theme.colors.primary}
+            onStateChange={({ open }) => setFabOpen(open)}
+            backdropColor="transparent"
+            style={{ position: "absolute", bottom: Math.max(insets.bottom - 4, 0), right: 16 }}
+          />
+        </Portal>
       )}
     </View>
   );

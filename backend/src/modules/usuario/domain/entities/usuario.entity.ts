@@ -1,6 +1,4 @@
-import { Despesa } from 'src/modules/despesa/domain/entities/despesa.entity';
-import { Receita } from 'src/modules/receita/domain/entities/receita.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
 export class Usuario {
@@ -9,10 +7,4 @@ export class Usuario {
 
   @Column()
   nome!: string;
-
-  @OneToMany(() => Despesa, (despesa) => despesa.usuario)
-  despesas: Despesa[];
-
-  @OneToMany(() => Receita, (receita) => receita.usuario)
-  receitas: Receita[];
 }
