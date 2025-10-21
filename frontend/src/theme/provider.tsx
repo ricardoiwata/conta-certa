@@ -8,6 +8,7 @@ import { useColorScheme } from "react-native";
 import { Provider as PaperProvider } from "react-native-paper";
 import { makePaperTheme } from "./adapters/paper";
 import { darkColors, lightColors, type ColorTokens } from "./scheme";
+import { ThemePreferenceProvider, useThemePreference } from "./ThemeContext";
 
 type AppTheme = { mode: "light" | "dark"; colors: ColorTokens };
 const ThemeCtx = createContext<AppTheme>({
@@ -15,9 +16,25 @@ const ThemeCtx = createContext<AppTheme>({
   colors: lightColors,
 });
 
-export function AppThemeProvider({ children }: { children: React.ReactNode }) {
-  const scheme = useColorScheme();
-  const mode: "light" | "dark" = scheme === "dark" ? "dark" : "light";
+function ThemeProviderInner({ children }: { children: React.ReactNode }) {
+  const systemScheme = useColorScheme();
+  const { themePreference, isLoading } = useThemePreference();
+  
+  // Determina o modo baseado na preferência do usuário
+  const mode: "light" | "dark" = useMemo(() => {
+    if (isLoading) return "light"; // Fallback durante carregamento
+    
+    switch (themePreference) {
+      case 'light':
+        return 'light';
+      case 'dark':
+        return 'dark';
+      case 'system':
+      default:
+        return systemScheme === "dark" ? "dark" : "light";
+    }
+  }, [themePreference, systemScheme, isLoading]);
+  
   const tokens = mode === "dark" ? darkColors : lightColors;
 
   const navTheme = useMemo(
@@ -48,6 +65,14 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
         <NavTheme value={navTheme}>{children}</NavTheme>
       </PaperProvider>
     </ThemeCtx.Provider>
+  );
+}
+
+export function AppThemeProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <ThemePreferenceProvider>
+      <ThemeProviderInner>{children}</ThemeProviderInner>
+    </ThemePreferenceProvider>
   );
 }
 
