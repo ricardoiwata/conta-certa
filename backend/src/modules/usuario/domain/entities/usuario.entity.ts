@@ -7,4 +7,8 @@ export class Usuario {
 
   @Column()
   nome!: string;
+
+  // ADICIONE ESTA COLUNA
+  @Column({ unique: true }) 
+  email!: string;
 }

@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ReceitaController } from './receita.controller';
-import { ReceitaService } from '../../application/services/receita.service';
-import { CreateReceitaDto } from '../../application/dto/create-receita.dto';
-import { UpdateReceitaDto } from '../../application/dto/update-receita.dto';
+import { DespesaController } from './despesa.controller';
+import { DespesaService } from '../../application/services/despesa.service';
+import { CreateDespesaDto } from '../../application/dto/create-despesa.dto';
+import { UpdateDespesaDto } from '../../application/dto/update-despesa.dto';
 
-describe('ReceitaController', () => {
-  let controller: ReceitaController;
-  let service: ReceitaService;
+describe('DespesaController', () => {
+  let controller: DespesaController;
+  let service: DespesaService;
 
-  const mockReceitaService = {
+  const mockDespesaService = {
     create: jest.fn(),
     findAll: jest.fn(),
     findAllRecorrentes: jest.fn(),
@@ -18,41 +18,41 @@ describe('ReceitaController', () => {
     remove: jest.fn(),
   };
 
-  const mockReceita = { id: 1, descricao: 'Salário' };
+  const mockDespesa = { id: 1, descricao: 'Teste' };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [ReceitaController],
+      controllers: [DespesaController],
       providers: [
         {
-          provide: ReceitaService,
-          useValue: mockReceitaService,
+          provide: DespesaService,
+          useValue: mockDespesaService,
         },
       ],
     }).compile();
 
-    controller = module.get<ReceitaController>(ReceitaController);
-    service = module.get<ReceitaService>(ReceitaService);
+    controller = module.get<DespesaController>(DespesaController);
+    service = module.get<DespesaService>(DespesaService);
   });
 
   it('deve estar definido', () => {
     expect(controller).toBeDefined();
   });
 
-  it('deve chamar service.create ao criar uma receita', () => {
-    const dto = new CreateReceitaDto();
-    mockReceitaService.create.mockResolvedValue(mockReceita);
+  it('deve chamar service.create ao criar uma despesa', () => {
+    const dto = new CreateDespesaDto();
+    mockDespesaService.create.mockResolvedValue(mockDespesa);
 
     controller.create(dto);
     expect(service.create).toHaveBeenCalledWith(dto);
   });
 
-  it('deve chamar service.findAll ao buscar todas as receitas', () => {
-    mockReceitaService.findAll.mockResolvedValue([mockReceita]);
+  it('deve chamar service.findAll ao buscar todas as despesas', () => {
+    mockDespesaService.findAll.mockResolvedValue([mockDespesa]);
     controller.findAll();
     expect(service.findAll).toHaveBeenCalled();
   });
-  
+
   it('deve chamar service.findAllRecorrentes', () => {
     controller.findAllRecorrentes();
     expect(service.findAllRecorrentes).toHaveBeenCalled();
@@ -64,20 +64,20 @@ describe('ReceitaController', () => {
   });
 
   it('deve chamar service.findOne com o ID correto', () => {
-    mockReceitaService.findOne.mockResolvedValue(mockReceita);
+    mockDespesaService.findOne.mockResolvedValue(mockDespesa);
     controller.findOne('1');
     expect(service.findOne).toHaveBeenCalledWith(1);
   });
 
   it('deve chamar service.update com os parâmetros corretos', () => {
-    const dto = new UpdateReceitaDto();
-    mockReceitaService.update.mockResolvedValue({ ...mockReceita, ...dto });
+    const dto = new UpdateDespesaDto();
+    mockDespesaService.update.mockResolvedValue({ ...mockDespesa, ...dto });
     controller.update('1', dto);
     expect(service.update).toHaveBeenCalledWith(1, dto);
   });
 
   it('deve chamar service.remove com o ID correto', () => {
-    mockReceitaService.remove.mockResolvedValue({ affected: 1 });
+    mockDespesaService.remove.mockResolvedValue({ affected: 1 });
     controller.remove('1');
     expect(service.remove).toHaveBeenCalledWith(1);
   });

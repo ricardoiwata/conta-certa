@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateDespesaDto {
   @IsString()
@@ -12,7 +12,6 @@ export class CreateDespesaDto {
 
   @IsDateString()
   @Transform(({ value }) => {
-    // Se vier no formato dd/mm/yyyy, converte para yyyy-mm-dd
     if (typeof value === 'string' && value.includes('/')) {
       const [day, month, year] = value.split('/');
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
@@ -33,8 +32,9 @@ export class CreateDespesaDto {
   @IsBoolean()
   recorrentePai: boolean;
 
+  @IsOptional()
   @IsNumber()
-  recorrentePaiId: number;
+  recorrentePaiId?: number;
 
   @IsBoolean()
   realizada: boolean;

@@ -24,4 +24,19 @@ export class CategoriaController {
   findOne(@Param('id') id: string) {
     return this.categoriaService.findOne(+id);
   }
+
+  @Post()
+  create(@Body() dto: CreateCategoriaDto) {
+    return this.categoriaService.create(dto);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateCategoriaDto) {
+    return this.categoriaService.update(+id, dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.categoriaService.remove(+id);
+  }
 }

@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateDespesaDto } from '../dto/create-despesa.dto';
 import { UpdateDespesaDto } from '../dto/update-despesa.dto';
 import { Despesa } from '../../domain/entities/despesa.entity';
-import { Categoria } from 'src/modules/categoria/domain/entities/categoria.entity';
+import { Categoria } from '../../../categoria/domain/entities/categoria.entity';
 
 @Injectable()
 export class DespesaService {

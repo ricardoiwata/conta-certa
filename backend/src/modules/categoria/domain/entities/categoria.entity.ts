@@ -1,5 +1,5 @@
-import { Despesa } from 'src/modules/despesa/domain/entities/despesa.entity';
-import { Receita } from 'src/modules/receita/domain/entities/receita.entity';
+import { Despesa } from '../../../despesa/domain/entities/despesa.entity';
+import { Receita } from '../../../receita/domain/entities/receita.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()

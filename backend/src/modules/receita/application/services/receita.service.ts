@@ -16,6 +16,7 @@ export class ReceitaService {
     const receita = this.receitaRepository.create({
       ...createReceitaDto,
       data: new Date(createReceitaDto.data),
+      dataCompetencia: new Date(createReceitaDto.dataCompetencia),
     });
 
     return this.receitaRepository.save(receita);
@@ -38,7 +39,7 @@ export class ReceitaService {
   }
 
   async findOne(id: number) {
-    const receita = await this.receitaRepository.findOne({ where: { id } });
+    const receita = await this.receitaRepository.findOneBy({ id });
 
     if (!receita) throw new NotFoundException(`Receita #${id} não encontrada`);
 
@@ -46,7 +47,7 @@ export class ReceitaService {
   }
 
   async update(id: number, updateReceitaDto: UpdateReceitaDto) {
-    this.findOne(id);
+    await this.findOne(id);
 
     await this.receitaRepository.update(id, updateReceitaDto);
 
