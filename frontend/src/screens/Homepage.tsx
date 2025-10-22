@@ -7,6 +7,7 @@ import {
   View,
   Pressable,
   StyleSheet,
+  Animated,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
@@ -22,8 +23,11 @@ import {
   useTheme,
   FAB,
   Portal,
+  Icon,
 } from "react-native-paper";
+import { LinearGradient } from 'expo-linear-gradient';
 import { dashboardData } from "@/data/dashboard";
+import { modernStyles } from "@/styles/modern.styles";
 import { listReceitas, listReceitasRecorrentes } from "@/services/receitas";
 import { listDespesas, listDespesasRecorrentes } from "@/services/despesas";
 
@@ -38,6 +42,7 @@ export default function Homepage() {
     }
   }, [loading, user, router]);
 
+
   const greeting = useMemo(() => {
     const h = new Date().getHours();
     if (h < 12) return "Bom dia";
@@ -51,7 +56,7 @@ export default function Homepage() {
   const [chooseType, setChooseType] = useState<null | "income" | "expense">(
     null
   );
-  const [chooseRecurringStep, setChooseRecurringStep] = useState<null | "sub">(
+  const [chooseRecurringStep, setChooseRecurringStep] = useState<null | "income" | "expense">(
     null
   );
   const [hasIncomeRecurringParents, setHasIncomeRecurringParents] = useState<
@@ -64,6 +69,12 @@ export default function Homepage() {
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const [receitas, setReceitas] = useState<any[]>([]);
   const [despesas, setDespesas] = useState<any[]>([]);
+  
+  // Animação para o card de saldo
+  const balanceAnimation = useState(new Animated.Value(0))[0];
+  const scaleAnimation = useState(new Animated.Value(0.95))[0];
+  const pulseAnimation = useState(new Animated.Value(1))[0];
+  const shineAnimation = useState(new Animated.Value(-100))[0];
 
   if (loading)
     return (
@@ -92,10 +103,76 @@ export default function Homepage() {
 
   const screenWidth = Dimensions.get("window").width;
   const horizontalPadding = 16;
+  const cardPadding = 16; // Padding interno do Card.Content
 
   const projecaoSaldoFinal = balance + receitasPendentes - despesasPendentes;
 
   const totalCategorias = categorias.reduce((acc, c) => acc + c.valor, 0) || 1;
+
+  // Animação de entrada do card de saldo
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(balanceAnimation, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnimation, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Animação de pulso sutil
+    const pulseLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnimation, {
+          toValue: 1.02,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnimation, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    
+    const timer = setTimeout(() => {
+      pulseLoop.start();
+    }, 1000);
+
+    // Efeito de brilho ocasional
+    const shineLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shineAnimation, {
+          toValue: screenWidth + 100,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.delay(5000),
+        Animated.timing(shineAnimation, {
+          toValue: -100,
+          duration: 0,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    const shineTimer = setTimeout(() => {
+      shineLoop.start();
+    }, 2000);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(shineTimer);
+      pulseLoop.stop();
+      shineLoop.stop();
+    };
+  }, [balance, screenWidth, balanceAnimation, scaleAnimation, pulseAnimation, shineAnimation]);
 
   // Recarrega resumo ao focar
   useFocusEffect(
@@ -192,70 +269,130 @@ export default function Homepage() {
         contentContainerStyle={{
           paddingTop: 12,
           paddingBottom: insets.bottom + 96,
-          paddingHorizontal: horizontalPadding,
-          gap: 12,
+          ...modernStyles.modernContainer,
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <View style={{ flex: 1 }}>
-            <Text variant="titleLarge" style={{ fontWeight: "700" }}>
-              {greeting}, {displayName}
+        <View style={[modernStyles.modernRow, modernStyles.modernHeader]}>
+          <View style={modernStyles.modernColumn}>
+            <Text style={[modernStyles.modernHeaderTitle, { color: theme.colors.onBackground }]}>
+              {greeting}, {displayName.split(" ")[0]}!
             </Text>
-            <Text variant="bodyMedium" style={{ opacity: 0.7 }}>
-              Bem-vindo(a) de volta
+            <Text style={[modernStyles.modernHeaderSubtitle, { color: theme.colors.onBackground }]}>
+              Aqui está o resumo das suas finanças
             </Text>
           </View>
           {/** Removed quick access to Receitas to restrict access via "Receita x Despesa" */}
-          <IconButton
-            icon="account-circle"
-            size={28}
-            mode="contained"
-            onPress={() => router.push("/profile")}
-            containerColor={theme.colors.elevation.level2}
-          />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={{ position: 'relative' }}>
+              <IconButton
+                icon="bell"
+                size={24}
+                mode="contained"
+                onPress={() => router.push("/details/notifications")}
+                containerColor={theme.colors.elevation.level2}
+              />
+              {notificacoes.length > 0 && (
+                <View style={[
+                  modernStyles.modernBadge,
+                  {
+                    position: 'absolute',
+                    top: 6,
+                    right: 6,
+                    backgroundColor: '#FF6B6B',
+                  }
+                ]}>
+                  <Text style={modernStyles.modernBadgeText}>
+                    {notificacoes.length}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <IconButton
+              icon="account-circle"
+              size={28}
+              mode="contained"
+              onPress={() => router.push("/profile")}
+              containerColor={theme.colors.elevation.level2}
+            />
+          </View>
         </View>
-        <Card
+        <Pressable
           testID="balance-card"
           onPress={() => router.push("/details/balance")}
+          style={modernStyles.balanceCard}
         >
-          <Card.Content>
-            <Text variant="titleSmall" style={{ opacity: 0.7 }}>
-              Saldo atual
-            </Text>
-            <Text variant="displaySmall" style={{ fontWeight: "800" }}>
-              {new Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              }).format(balance)}
-            </Text>
-          </Card.Content>
-        </Card>
+          <LinearGradient
+            colors={balance >= 0 ? ['#4CAF50', '#45a049', '#2E7D32'] : ['#f44336', '#e53935', '#c62828']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={modernStyles.balanceGradient}
+          >
+            <View style={modernStyles.balanceCardContent}>
+              <View style={modernStyles.balanceIcon}>
+                <Icon
+                  source="wallet"
+                  size={32}
+                  color="rgba(255, 255, 255, 0.3)"
+                />
+              </View>
+              
+              <Text style={[modernStyles.balanceLabel, { color: 'white' }]}>
+                Saldo Atual
+              </Text>
+              
+              <Text style={[modernStyles.balanceValue, { color: 'white' }]}>
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(balance)}
+              </Text>
+              
+              <View style={modernStyles.balanceIndicator}>
+                <Icon
+                  source={balance >= 0 ? "trending-up" : "trending-down"}
+                  size={16}
+                  color="white"
+                />
+                <Text style={modernStyles.balanceIndicatorText}>
+                  {balance >= 0 ? "Saldo Positivo" : "Saldo Negativo"}
+                </Text>
+              </View>
+            </View>
+          </LinearGradient>
+        </Pressable>
 
         <Card
           testID="summary-card"
           onPress={() => router.push("/details/summary")}
+          style={modernStyles.modernCard}
         >
-          <Card.Title title="Resumo do mês" titleVariant="titleMedium" />
-          <Card.Content style={{ gap: 12 }}>
-            <View style={{ flexDirection: "row", gap: 12 }}>
-              <View style={{ flex: 1 }}>
-                <Text style={{ opacity: 0.7 }}>Receitas recebidas</Text>
-                <Text
-                  variant="titleLarge"
-                  style={{ color: theme.colors.primary, fontWeight: "700" }}
-                >
+          <Card.Content style={[modernStyles.modernCardContent, modernStyles.modernGap]}>
+            <Text style={[modernStyles.modernTitle, { color: theme.colors.onSurface }]}>
+              Resumo do mês
+            </Text>
+            <View style={[modernStyles.modernRow, modernStyles.modernGapSmall]}>
+              <View style={modernStyles.modernColumn}>
+                <Text style={[modernStyles.modernSubtitle, { color: theme.colors.onSurface }]}>
+                  Receitas recebidas
+                </Text>
+                <Text style={[modernStyles.modernValue, { 
+                  color: theme.colors.primary,
+                  fontSize: 18
+                }]}>
                   {new Intl.NumberFormat("pt-BR", {
                     style: "currency",
                     currency: "BRL",
                   }).format(apiTotalReceitasRecebidas)}
                 </Text>
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ opacity: 0.7 }}>Despesas pagas</Text>
-                <Text
-                  variant="titleLarge"
-                  style={{ color: theme.colors.error, fontWeight: "700" }}
-                >
+              <View style={modernStyles.modernColumn}>
+                <Text style={[modernStyles.modernSubtitle, { color: theme.colors.onSurface }]}>
+                  Despesas pagas
+                </Text>
+                <Text style={[modernStyles.modernValue, { 
+                  color: theme.colors.error,
+                  fontSize: 18
+                }]}>
                   {new Intl.NumberFormat("pt-BR", {
                     style: "currency",
                     currency: "BRL",
@@ -264,8 +401,17 @@ export default function Homepage() {
               </View>
             </View>
             <View>
-              <Text style={{ opacity: 0.7 }}>Projeção do saldo final</Text>
-              <Text variant="headlineMedium" style={{ fontWeight: "700" }}>
+              <Text style={{ 
+                opacity: 0.7, 
+                fontSize: 13,
+                fontWeight: '500'
+              }}>
+                Projeção do saldo final
+              </Text>
+              <Text variant="headlineMedium" style={{ 
+                fontWeight: "700",
+                fontSize: 20
+              }}>
                 {new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
@@ -282,26 +428,38 @@ export default function Homepage() {
           testID="income-vs-expense-card"
           onPress={() => router.push("/details/income-vs-expense")}
         >
-          <Card.Title title="Receita x Despesa" titleVariant="titleMedium" />
           <Card.Content>
+            <Text 
+              variant="titleMedium" 
+              style={{ 
+                fontWeight: '600', 
+                fontSize: 16,
+                marginBottom: 8,
+                marginTop: 4,
+                textAlign: 'left',
+                paddingHorizontal: 4
+              }}
+            >
+              Receita x Despesa
+            </Text>
             <LineChart
               data={{
-                labels,
+                labels: [...labels],
                 datasets: [
                   {
-                    data: receita,
+                    data: [...receita],
                     color: () => theme.colors.primary,
-                    strokeWidth: 2,
+                    strokeWidth: 3,
                   },
                   {
-                    data: despesa,
+                    data: [...despesa],
                     color: () => theme.colors.error,
-                    strokeWidth: 2,
+                    strokeWidth: 3,
                   },
                 ],
                 legend: ["Receita", "Despesa"],
               }}
-              width={screenWidth - horizontalPadding * 2}
+              width={screenWidth - horizontalPadding * 2 - cardPadding * 2 - 8}
               height={180}
               yAxisLabel="R$ "
               yAxisSuffix=""
@@ -312,18 +470,30 @@ export default function Homepage() {
                 decimalPlaces: 0,
                 color: () => theme.colors.onSurface,
                 labelColor: () => theme.colors.onSurface,
-                propsForLabels: { fontSize: 10 },
-                propsForDots: { r: "2", strokeWidth: "1" },
+                propsForLabels: { 
+                  fontSize: 12,
+                  fontWeight: '600',
+                  fontFamily: 'System',
+                  fill: theme.colors.onSurface
+                },
+                propsForDots: { r: "3", strokeWidth: "1.5" },
                 propsForBackgroundLines: {
-                  stroke: "rgba(0,0,0,0.08)",
-                  strokeDasharray: "3 6",
+                  stroke: theme.colors.outline + '40',
+                  strokeDasharray: "2 4",
                 },
                 useShadowColorFromDataset: false,
               }}
               bezier
               withShadow={false}
               withVerticalLines={false}
-              style={{ marginVertical: 4 }}
+              withHorizontalLines={true}
+              withInnerLines={false}
+              withOuterLines={false}
+              style={{ 
+                marginVertical: 8, 
+                marginHorizontal: 4,
+                borderRadius: 8
+              }}
             />
           </Card.Content>
         </Card>
@@ -332,8 +502,20 @@ export default function Homepage() {
           testID="upcoming-card"
           onPress={() => router.push("/details/upcoming")}
         >
-          <Card.Title title="Próximos 7 dias" titleVariant="titleMedium" />
           <Card.Content>
+            <Text 
+              variant="titleMedium" 
+              style={{ 
+                fontWeight: '600', 
+                fontSize: 16,
+                marginBottom: 8,
+                marginTop: 4,
+                textAlign: 'left',
+                paddingHorizontal: 4
+              }}
+            >
+              Próximos 7 dias
+            </Text>
             {proximos7Dias.map((item) => (
               <List.Item
                 key={item.id}
@@ -362,8 +544,20 @@ export default function Homepage() {
           testID="alerts-card"
           onPress={() => router.push("/details/alerts")}
         >
-          <Card.Title title="Alertas" titleVariant="titleMedium" />
           <Card.Content>
+            <Text 
+              variant="titleMedium" 
+              style={{ 
+                fontWeight: '600', 
+                fontSize: 16,
+                marginBottom: 8,
+                marginTop: 4,
+                textAlign: 'left',
+                paddingHorizontal: 4
+              }}
+            >
+              Alertas
+            </Text>
             {alertas.map((a) => (
               <List.Item
                 key={a.id}
@@ -388,11 +582,20 @@ export default function Homepage() {
           testID="categories-card"
           onPress={() => router.push("/details/categories")}
         >
-          <Card.Title
-            title="Top categorias de gastos"
-            titleVariant="titleMedium"
-          />
           <Card.Content style={{ gap: 8 }}>
+            <Text 
+              variant="titleMedium" 
+              style={{ 
+                fontWeight: '600', 
+                fontSize: 16,
+                marginBottom: 8,
+                marginTop: 4,
+                textAlign: 'left',
+                paddingHorizontal: 4
+              }}
+            >
+              Top categorias de gastos
+            </Text>
             {categorias.map((c) => {
               const pct = c.valor / totalCategorias;
               return (
@@ -403,8 +606,17 @@ export default function Homepage() {
                       justifyContent: "space-between",
                     }}
                   >
-                    <Text>{c.nome}</Text>
-                    <Text style={{ opacity: 0.7 }}>
+                    <Text style={{ 
+                      fontSize: 14,
+                      fontWeight: '500'
+                    }}>
+                      {c.nome}
+                    </Text>
+                    <Text style={{ 
+                      opacity: 0.7,
+                      fontSize: 14,
+                      fontWeight: '600'
+                    }}>
                       {new Intl.NumberFormat("pt-BR", {
                         style: "currency",
                         currency: "BRL",
@@ -418,25 +630,22 @@ export default function Homepage() {
           </Card.Content>
         </Card>
 
-        <Card
-          testID="notifications-card"
-          onPress={() => router.push("/details/notifications")}
-        >
-          <Card.Title title="Notificações" titleVariant="titleMedium" />
-          <Card.Content>
-            {notificacoes.slice(0, 3).map((n) => (
-              <List.Item
-                key={n.id}
-                title={n.texto}
-                left={(props) => <List.Icon {...props} icon="bell" />}
-              />
-            ))}
-          </Card.Content>
-        </Card>
 
         <Card testID="tip-card" onPress={() => router.push("/details/tip")}>
-          <Card.Title title="Dica financeira" titleVariant="titleMedium" />
           <Card.Content>
+            <Text 
+              variant="titleMedium" 
+              style={{ 
+                fontWeight: '600', 
+                fontSize: 16,
+                marginBottom: 8,
+                marginTop: 4,
+                textAlign: 'left',
+                paddingHorizontal: 4
+              }}
+            >
+              Dica financeira
+            </Text>
             <List.Item
               title={dica}
               left={(props) => (

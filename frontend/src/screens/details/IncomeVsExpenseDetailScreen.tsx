@@ -6,7 +6,8 @@ import { Card, SegmentedButtons, Text, useTheme } from "react-native-paper";
 import { LineChart } from "react-native-chart-kit";
 
 const chartHorizontalPadding = 16;
-const chartWidth = Dimensions.get("window").width - chartHorizontalPadding * 2;
+const cardPadding = 16; // Padding interno do Card.Content
+const chartWidth = Dimensions.get("window").width - chartHorizontalPadding * 2 - cardPadding * 2 - 8;
 
 export default function IncomeVsExpenseDetailScreen() {
   const theme = useTheme();
@@ -129,19 +130,19 @@ export default function IncomeVsExpenseDetailScreen() {
 
           <LineChart
             data={{
-              labels: activePeriod.labels,
-              datasets: [
-                {
-                  data: activePeriod.receita,
-                  color: () => theme.colors.primary,
-                  strokeWidth: 2,
-                },
-                {
-                  data: activePeriod.despesa,
-                  color: () => theme.colors.error,
-                  strokeWidth: 2,
-                },
-              ],
+              labels: [...activePeriod.labels],
+                datasets: [
+                  {
+                    data: [...activePeriod.receita],
+                    color: () => theme.colors.primary,
+                    strokeWidth: 3,
+                  },
+                  {
+                    data: [...activePeriod.despesa],
+                    color: () => theme.colors.error,
+                    strokeWidth: 3,
+                  },
+                ],
               legend: ["Receita", "Despesa"],
             }}
             width={chartWidth}
@@ -154,18 +155,30 @@ export default function IncomeVsExpenseDetailScreen() {
               decimalPlaces: 0,
               color: () => theme.colors.onSurface,
               labelColor: () => theme.colors.onSurface,
-              propsForLabels: { fontSize: 10 },
-              propsForDots: { r: "3", strokeWidth: "1.5" },
+              propsForLabels: { 
+                fontSize: 12,
+                fontWeight: '600',
+                fontFamily: 'System',
+                fill: theme.colors.onSurface
+              },
+              propsForDots: { r: "4", strokeWidth: "2" },
               propsForBackgroundLines: {
-                stroke: "rgba(0,0,0,0.08)",
-                strokeDasharray: "3 6",
+                stroke: theme.colors.outline + '40',
+                strokeDasharray: "2 4",
               },
               useShadowColorFromDataset: false,
             }}
             bezier
             withShadow={false}
             withVerticalLines={false}
-            style={{ marginVertical: 4 }}
+            withHorizontalLines={true}
+            withInnerLines={false}
+            withOuterLines={false}
+            style={{ 
+              marginVertical: 8, 
+              marginHorizontal: 4,
+              borderRadius: 8
+            }}
           />
 
           <View style={{ gap: 12 }}>
