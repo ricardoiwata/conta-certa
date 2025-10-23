@@ -16,13 +16,6 @@ const ThemeCtx = createContext<AppTheme>({
   colors: lightColors,
 });
 
-<<<<<<< HEAD
-export function AppThemeProvider({ children }: { children: React.ReactNode }) {
-  const FORCE_LIGHT = true;
-  const scheme = useColorScheme()
-const mode: "light" | "dark" = FORCE_LIGHT ? "light" : scheme === "dark" ? "dark" : "light";
-const tokens = mode === "dark" ? darkColors : lightColors;
-=======
 function ThemeProviderInner({ children }: { children: React.ReactNode }) {
   const systemScheme = useColorScheme();
   const { themePreference, isLoading } = useThemePreference();
@@ -43,7 +36,6 @@ function ThemeProviderInner({ children }: { children: React.ReactNode }) {
   }, [themePreference, systemScheme, isLoading]);
   
   const tokens = mode === "dark" ? darkColors : lightColors;
->>>>>>> 25f30ab5edb1d38114d66f02a6722add09dfac2e
 
   const navTheme = useMemo(
     () => ({
