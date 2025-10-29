@@ -1,3 +1,23 @@
+### ------------------------------------------------------------------ USUARIO ------------------------------------------------------------------
+
+### POST - Criar novo usuario
+POST http://localhost:3000/usuario
+Content-Type: application/json
+
+{
+    "nome": "Joao",
+    "email": "joao@gmail.com"
+}
+
+
+
+
+
+
+
+
+
+
 ### ------------------------------------------------------------------ DESPESAS ------------------------------------------------------------------
 
 ### GET ALL despesas
@@ -320,3 +340,66 @@ GET http://localhost:3000/categoria
 
 ### GET BY ID categorias
 GET http://localhost:3000/categoria/1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### NOTIFICAÇÕES - TEST SUITE (assume http://localhost:3000)
+
+### POST - Criar notificação
+POST http://localhost:3000/notificacao
+Content-Type: application/json
+
+{
+  "descricao": "Saldo atualizado",
+  "usuarioId": 2
+}
+
+### GET - Todas as notificações
+GET http://localhost:3000/notificacao
+
+### GET - Notificação por ID
+GET http://localhost:3000/notificacao/1
+
+### GET - Listar todas as notificações de um usuário (recomendada: implementar rota GET /notificacao/user/:id)
+GET http://localhost:3000/notificacao/user/1
+
+### GET - Listar somente notificações ativas de um usuário (recomendada: implementar rota GET /notificacao/user/:id/active)
+GET http://localhost:3000/notificacao/user/2/active
+
+### PATCH - Desativar (deleção lógica) uma notificação
+PATCH http://localhost:3000/notificacao/1
+
+### PATCH - Desativar várias notificações (body: { ids: number[] })
+PATCH http://localhost:3000/notificacao/deactivate
+Content-Type: application/json
+
+{
+  "ids": [2, 3, 4]
+}
+
+### PATCH - Desativar todas as notificações de um usuário
+PATCH http://localhost:3000/notificacao/user/2/deactivate
+
+### GET - Todas as notificações de um usuário (criar rota)
+GET http://localhost:3000/notificacao/user/1
+
+
+### DELETE - Remover (hard delete) uma notificação
+DELETE http://localhost:3000/notificacao/1

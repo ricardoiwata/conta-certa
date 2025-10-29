@@ -4,17 +4,35 @@ import { Repository } from 'typeorm';
 import { Usuario } from '../../domain/entities/usuario.entity';
 import { CreateUsuarioDto } from '../dto/create-usuario.dto';
 import { UpdateUsuarioDto } from '../dto/update-usuario.dto';
+import { PreferenciasNotificacao } from 'src/modules/preferencias-notificacao/domain/entities/preferencias-notificacao.entity';
 
 @Injectable()
 export class UsuarioService {
   constructor(
     @InjectRepository(Usuario)
     private readonly usuarioRepository: Repository<Usuario>,
+
+    @InjectRepository(PreferenciasNotificacao)
+    private readonly preferenciasNotificacaoRepository: Repository<PreferenciasNotificacao>,
   ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
     const usuario = this.usuarioRepository.create(createUsuarioDto);
-    return this.usuarioRepository.save(usuario);
+    const usuarioSalvo = await this.usuarioRepository.save(usuario);
+
+    const preferenciasNotificacao =
+      await this.preferenciasNotificacaoRepository.create({
+        usuarioId: usuario.id,
+      });
+    await this.preferenciasNotificacaoRepository.save(preferenciasNotificacao);
+
+    console.log(
+      await this.preferenciasNotificacaoRepository.findOneBy({
+        id: preferenciasNotificacao.id,
+      }),
+    );
+
+    return usuarioSalvo;
   }
 
   async findAll(): Promise<Usuario[]> {

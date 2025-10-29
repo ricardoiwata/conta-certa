@@ -19,13 +19,13 @@ export class UsuarioSeedService implements OnModuleInit {
 
     if (count === 0) {
       const usuarios = [
-        { nome: 'João Victor' },
-        { nome: 'Ricardo Iwata' },
-        { nome: 'Marcos Frota' },
-        { nome: 'Paulo Victor' },
-        { nome: 'Nicolas Medeiros' },
-        { nome: 'João Fernando' },
-        { nome: 'Matheus Dutra' },
+        { nome: 'João Victor', email: 'joao@gmail.com' },
+        // { nome: 'Ricardo Iwata' },
+        // { nome: 'Marcos Frota' },
+        // { nome: 'Paulo Victor' },
+        // { nome: 'Nicolas Medeiros' },
+        // { nome: 'João Fernando' },
+        // { nome: 'Matheus Dutra' },
       ];
 
       await this.usuarioRepositorio.save(usuarios);

@@ -24,7 +24,7 @@ export class Receita {
   recorrentePai: boolean;
 
   @Column({ nullable: true })
-  recorrentePaiId: number | null;
+  recorrentePaiId: number;
 
   @Column()
   realizada: boolean;
