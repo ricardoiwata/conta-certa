@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Notificacao } from 'src/notificacao/domain/entities/notificacao.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
 @Entity()
 export class Usuario {
@@ -9,6 +10,9 @@ export class Usuario {
   nome!: string;
 
   // ADICIONE ESTA COLUNA
-  @Column({ unique: true }) 
+  @Column({ unique: true })
   email!: string;
+
+  @OneToMany(() => Notificacao, (notificacao) => notificacao.usuario)
+  notificacoes: Notificacao[];
 }
