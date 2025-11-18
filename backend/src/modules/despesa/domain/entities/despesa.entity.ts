@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Categoria } from '../../../categoria/domain/entities/categoria.entity';
+import { Usuario } from 'src/modules/usuario/domain/entities/usuario.entity';
 
 @Entity('despesas')
 export class Despesa {
@@ -35,7 +36,10 @@ export class Despesa {
 
   // Firebase user UID (no local relation)
   @Column()
-  usuarioUid: string;
+  usuarioId: number;
+
+  @ManyToOne(() => Usuario, (usuario) => usuario.despesas)
+  usuario: Usuario;
 
   @ManyToOne(() => Categoria, (categoria) => categoria.despesa)
   categoria: Categoria;

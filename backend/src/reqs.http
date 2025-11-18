@@ -37,15 +37,15 @@ POST http://localhost:3000/despesa
 Content-Type: application/json
 
 {
-    "descricao": "Compra de supermercado",
-    "valor": 150.75,
-    "data": "10/09/2025",
+    "descricao": "Cursos online",
+    "valor": 2123.75,
+    "data": "02/11/2025",
     "formaPagamento": "Pix",
     "recorrentePai": false,
     "recorrentePaiId": 0,
     "realizada": true,
-    "usuarioId": 1,
-    "categoriaId": 1
+    "usuarioId": 2,
+    "categoriaId": 4
 }
 
 ### POST - Criar despesa recorrente PAI
@@ -55,7 +55,7 @@ Content-Type: application/json
 {
     "descricao": "Aluguel mensal",
     "valor": 1200.00,
-    "data": "05/10/2025",
+    "data": "05/10/2026",
     "formaPagamento": "Débito",
     "recorrentePai": true,
     "recorrentePaiId": 0,
@@ -151,6 +151,18 @@ Content-Type: application/json
 ### DELETE despesa inexistente (deve retornar 404)
 DELETE http://localhost:3000/despesa/999
 
+### GET despesas futuras
+GET http://localhost:3000/despesa/futuras/2
+
+### GET despesas futuras mês
+GET http://localhost:3000/despesa/mes/2
+
+### GET despesas meses passados
+GET http://localhost:3000/despesa/mesRetroativo/2
+
+### GET despesas futuras por dia - Modelo de data YYYY-MM-DD
+GET http://localhost:3000/despesa/dia/2?data=2025-11-01
+
 
 
 
@@ -183,9 +195,9 @@ Content-Type: application/json
 
 {
     "valor": 5000.00,
-    "data": "01/10/2025",
-    "dataCompetencia": "01/10/2025",
-    "descricao": "Salário outubro",
+    "data": "01/12/2025",
+    "dataCompetencia": "01/12/2025",
+    "descricao": "Salário dezembro",
     "origem": "Fixo",
     "recorrentePai": false,
     "recorrentePaiId": 0,
@@ -293,23 +305,6 @@ Content-Type: application/json
     "categoriaId": 9
 }
 
-### POST com categoria inexistente (deve retornar 404)
-POST http://localhost:3000/receita
-Content-Type: application/json
-
-{
-    "valor": 1000.00,
-    "data": "10/10/2025",
-    "dataCompetencia": "10/10/2025",
-    "descricao": "Teste erro categoria",
-    "origem": "Fixo",
-    "recorrentePai": false,
-    "recorrentePaiId": 0,
-    "realizada": true,
-    "usuarioId": 1,
-    "categoriaId": 999
-}
-
 ### PATCH receita inexistente (deve retornar 404)
 PATCH http://localhost:3000/receita/999
 Content-Type: application/json
@@ -320,6 +315,9 @@ Content-Type: application/json
 
 ### DELETE receita inexistente (deve retornar 404)
 DELETE http://localhost:3000/receita/999
+
+### GET receitas futuras
+GET http://localhost:3000/receita/futuras/1
 
 
 

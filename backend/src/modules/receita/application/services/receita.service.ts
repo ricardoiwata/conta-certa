@@ -1,15 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateReceitaDto } from '../dto/create-receita.dto';
 import { UpdateReceitaDto } from '../dto/update-receita.dto';
 import { Receita } from '../../domain/entities/receita.entity';
+import { Usuario } from 'src/modules/usuario/domain/entities/usuario.entity';
 
 @Injectable()
 export class ReceitaService {
   constructor(
     @InjectRepository(Receita)
     private receitaRepository: Repository<Receita>,
+    @InjectRepository(Usuario)
+    private usuarioRepository: Repository<Usuario>,
   ) {}
 
   async create(createReceitaDto: CreateReceitaDto) {
@@ -56,5 +59,25 @@ export class ReceitaService {
 
   remove(id: number) {
     return this.receitaRepository.delete(id);
+  }
+
+  async getReceitasFuturas(usuarioId: number) {
+    const usuario = await this.usuarioRepository.findOne({
+      where: { id: usuarioId },
+    });
+
+    if (!usuario)
+      throw new NotFoundException(`Usuario #${usuarioId} não encontrado`);
+
+    const agora = new Date();
+    const inicioProximoMes = new Date(agora.getFullYear(), agora.getMonth());
+
+    return this.receitaRepository.find({
+      where: {
+        usuarioId,
+        data: MoreThanOrEqual(inicioProximoMes),
+      },
+      order: { data: 'ASC' },
+    });
   }
 }

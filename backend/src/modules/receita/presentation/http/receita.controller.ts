@@ -40,6 +40,11 @@ export class ReceitaController {
     return this.receitaService.findOne(+id);
   }
 
+  @Get('/futuras/:usuarioId')
+  getReceitasFuturas(@Param('usuarioId') usuarioId: string) {
+    return this.receitaService.getReceitasFuturas(+usuarioId);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateReceitaDto: UpdateReceitaDto) {
     return this.receitaService.update(+id, updateReceitaDto);

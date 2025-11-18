@@ -1,5 +1,13 @@
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateDespesaDto {
   @IsString()
@@ -39,9 +47,9 @@ export class CreateDespesaDto {
   @IsBoolean()
   realizada: boolean;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  usuarioUid: string;
+  usuarioId: number;
 
   @IsNumber()
   @IsNotEmpty()

@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { DespesaService } from '../../application/services/despesa.service';
 import { CreateDespesaDto } from '../../application/dto/create-despesa.dto';
@@ -37,6 +38,29 @@ export class DespesaController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.despesaService.findOne(+id);
+  }
+
+  @Get('/futuras/:usuarioId')
+  getDespesasFuturas(@Param('usuarioId') usuarioId: string) {
+    return this.despesaService.getDespesasFuturas(+usuarioId);
+  }
+
+  @Get('/mes/:usuarioId')
+  getDespesasMes(@Param('usuarioId') usuarioId: string) {
+    return this.despesaService.getDespesasMes(+usuarioId);
+  }
+
+  @Get('/mesRetroativo/:usuarioId')
+  getDespesasMesesPassados(@Param('usuarioId') usuarioId: string) {
+    return this.despesaService.getDespesasMesesPassados(+usuarioId);
+  }
+
+  @Get('/dia/:usuarioId')
+  getDespesasDia(
+    @Param('usuarioId') usuarioId: string,
+    @Query('data') data: string,
+  ) {
+    return this.despesaService.getDespesasDia(+usuarioId, data);
   }
 
   @Patch(':id')

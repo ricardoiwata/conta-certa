@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository, Between } from 'typeorm';
 import { CreateDespesaDto } from '../dto/create-despesa.dto';
 import { UpdateDespesaDto } from '../dto/update-despesa.dto';
 import { Despesa } from '../../domain/entities/despesa.entity';
 import { Categoria } from '../../../categoria/domain/entities/categoria.entity';
+import { Usuario } from 'src/modules/usuario/domain/entities/usuario.entity';
 
 @Injectable()
 export class DespesaService {
@@ -13,6 +14,8 @@ export class DespesaService {
     private despesaRepository: Repository<Despesa>,
     @InjectRepository(Categoria)
     private categoriaRepositorio: Repository<Categoria>,
+    @InjectRepository(Usuario)
+    private usuarioRepositorio: Repository<Usuario>,
   ) {}
 
   async create(createDespesaDto: CreateDespesaDto) {
@@ -75,5 +78,126 @@ export class DespesaService {
 
   remove(id: number) {
     return this.despesaRepository.delete(id);
+  }
+
+  async getDespesasFuturas(usuarioId: number) {
+    const usuario = await this.usuarioRepositorio.findOne({
+      where: { id: usuarioId },
+    });
+
+    if (!usuario)
+      throw new NotFoundException(`Usuario #${usuarioId} não encontrado`);
+
+    const agora = new Date();
+    const inicioProximoMes = new Date(agora.getFullYear(), agora.getMonth());
+
+    return this.despesaRepository.find({
+      where: {
+        usuarioId,
+        data: MoreThanOrEqual(inicioProximoMes),
+      },
+      relations: ['categoria'],
+      order: { data: 'ASC' },
+    });
+  }
+
+  async getDespesasMes(usuarioId: number) {
+    const usuario = await this.usuarioRepositorio.findOne({
+      where: { id: usuarioId },
+    });
+    if (!usuario)
+      throw new NotFoundException(`Usuario #${usuarioId} não encontrado`);
+
+    // Janela: do início do mes atual até o fim do 12º mês (12 meses no total)
+    const agora = new Date();
+    const inicioMesAtual = new Date(
+      agora.getFullYear(),
+      agora.getMonth(),
+      1,
+      0,
+      0,
+      0,
+      0,
+    );
+    const fimJanela = new Date(
+      inicioMesAtual.getFullYear(),
+      inicioMesAtual.getMonth() + 12,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
+
+    return this.despesaRepository.find({
+      where: {
+        usuarioId,
+        data: Between(inicioMesAtual, fimJanela),
+      },
+      order: { data: 'ASC' },
+    });
+  }
+
+  async getDespesasMesesPassados(usuarioId: number) {
+    const usuario = await this.usuarioRepositorio.findOne({
+      where: { id: usuarioId },
+    });
+    if (!usuario)
+      throw new NotFoundException(`Usuario #${usuarioId} não encontrado`);
+
+    const agora = new Date();
+    // início do mês atual
+    const inicioMesAtual = new Date(
+      agora.getFullYear(),
+      agora.getMonth(),
+      1,
+      0,
+      0,
+      0,
+      0,
+    );
+    // início da janela: 11 meses antes (total = 12 meses contando o atual)
+    const inicioJanela = new Date(
+      inicioMesAtual.getFullYear(),
+      inicioMesAtual.getMonth() - 11,
+      1,
+      0,
+      0,
+      0,
+      0,
+    );
+    // fim da janela: último dia do mês atual, 23:59:59.999
+    const fimJanela = new Date(
+      inicioMesAtual.getFullYear(),
+      inicioMesAtual.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
+
+    return this.despesaRepository.find({
+      where: {
+        usuarioId,
+        data: Between(inicioJanela, fimJanela),
+      },
+      order: { data: 'ASC' },
+    });
+  }
+
+  async getDespesasDia(usuarioId: number, data: string) {
+    const usuario = await this.usuarioRepositorio.findOne({
+      where: { id: usuarioId },
+    });
+    if (!usuario)
+      throw new NotFoundException(`Usuario #${usuarioId} não encontrado`);
+
+    const dataObj = new Date(data);
+
+    return this.despesaRepository.find({
+      where: { usuarioId, data: dataObj },
+      order: { data: 'ASC' },
+    });
   }
 }
