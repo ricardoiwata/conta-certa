@@ -22,24 +22,43 @@ export class ReceitaService {
     return this.receitaRepository.save(receita);
   }
 
-  async findAll() {
+  async findAll(firebaseUid?: string) {
+    if (firebaseUid) {
+      return await this.receitaRepository.find({
+        where: { usuarioUid: firebaseUid },
+      });
+    }
     return await this.receitaRepository.find();
   }
 
-  async findAllRecorrentes() {
+  async findAllRecorrentes(firebaseUid?: string) {
+    if (firebaseUid) {
+      return await this.receitaRepository.find({
+        where: { recorrentePai: true, usuarioUid: firebaseUid },
+      });
+    }
     return await this.receitaRepository.find({
       where: { recorrentePai: true },
     });
   }
 
-  async findAllRecorrentesFilhas(id: number) {
+  async findAllRecorrentesFilhas(id: number, firebaseUid?: string) {
+    if (firebaseUid) {
+      return await this.receitaRepository.find({
+        where: { recorrentePaiId: id, usuarioUid: firebaseUid },
+      });
+    }
     return await this.receitaRepository.find({
       where: { recorrentePaiId: id },
     });
   }
 
-  async findOne(id: number) {
-    const receita = await this.receitaRepository.findOneBy({ id });
+  async findOne(id: number, firebaseUid?: string) {
+    const where: any = { id };
+    if (firebaseUid) {
+      where.usuarioUid = firebaseUid;
+    }
+    const receita = await this.receitaRepository.findOneBy(where);
 
     if (!receita) throw new NotFoundException(`Receita #${id} não encontrada`);
 

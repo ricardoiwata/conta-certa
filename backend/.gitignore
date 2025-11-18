@@ -18,6 +18,7 @@ Thumbs.db
 # Env files
 .env
 .env.*
+firebase-credentials.json
 
 # Editor folders
 .vscode/

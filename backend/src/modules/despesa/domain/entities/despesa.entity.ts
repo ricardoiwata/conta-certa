@@ -12,7 +12,7 @@ export class Despesa {
   @Column('decimal', { precision: 10, scale: 2 })
   valor: number;
 
-  @Column()
+  @Column('datetime', { nullable: true })
   data: Date;
 
   @Column()

@@ -1,13 +1,28 @@
-import { dashboardData } from "@/data/dashboard";
 import { modernStyles } from "@/styles/modern.styles";
 import DetailScaffold from "./DetailScaffold";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, List, Text, useTheme, Badge } from "react-native-paper";
 import { View } from "react-native";
+import { getDashboardData } from "@/services/dashboard";
 
 export default function NotificationsDetailScreen() {
   const theme = useTheme();
-  const { notificacoes } = dashboardData;
+  const [notificacoes, setNotificacoes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const data = await getDashboardData();
+        setNotificacoes(data.notificacoes || []);
+      } catch (e) {
+        console.error("Erro ao carregar notificações:", e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   return (
     <DetailScaffold title="Notificações" description="Gerencie os avisos recebidos recentemente.">

@@ -6,10 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ReceitaService } from '../../application/services/receita.service';
 import { CreateReceitaDto } from '../../application/dto/create-receita.dto';
 import { UpdateReceitaDto } from '../../application/dto/update-receita.dto';
+import { FirebaseAuthGuard } from 'src/auth/firebase-auth.guard';
 
 @Controller('receita')
 export class ReceitaController {
@@ -20,24 +23,32 @@ export class ReceitaController {
     return this.receitaService.create(createReceitaDto);
   }
 
-  @Get()
-  findAll() {
-    return this.receitaService.findAll();
-  }
-
-  @Get('/recorrentes')
-  findAllRecorrentes() {
-    return this.receitaService.findAllRecorrentes();
-  }
-
+  @UseGuards(FirebaseAuthGuard)
   @Get('/recorrentes/:id')
-  findAllRecorrentesFilhas(@Param('id') id: string) {
-    return this.receitaService.findAllRecorrentesFilhas(+id);
+  findAllRecorrentesFilhas(@Param('id') id: string, @Request() req: any) {
+    const firebaseUid = req.firebaseUid;
+    return this.receitaService.findAllRecorrentesFilhas(+id, firebaseUid);
   }
 
+  @UseGuards(FirebaseAuthGuard)
+  @Get('/recorrentes')
+  findAllRecorrentes(@Request() req: any) {
+    const firebaseUid = req.firebaseUid;
+    return this.receitaService.findAllRecorrentes(firebaseUid);
+  }
+
+  @UseGuards(FirebaseAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.receitaService.findOne(+id);
+  findOne(@Param('id') id: string, @Request() req: any) {
+    const firebaseUid = req.firebaseUid;
+    return this.receitaService.findOne(+id, firebaseUid);
+  }
+
+  @UseGuards(FirebaseAuthGuard)
+  @Get()
+  findAll(@Request() req: any) {
+    const firebaseUid = req.firebaseUid;
+    return this.receitaService.findAll(firebaseUid);
   }
 
   @Patch(':id')

@@ -21,19 +21,19 @@ export async function createReceita(input: CreateReceitaInput) {
 }
 
 export async function listReceitas() {
-  return api.get<any[]>("/receita");
+  return api.get<any[]>("/receita", true);
 }
 
 export async function getReceita(id: number) {
-  return api.get<any>(`/receita/${id}`);
+  return api.get<any>(`/receita/${id}`, true);
 }
 
 export async function listReceitasRecorrentes() {
-  return api.get<any[]>("/receita/recorrentes");
+  return api.get<any[]>("/receita/recorrentes", true);
 }
 
 export async function listReceitasRecorrentesFilhas(recorrentePaiId: number) {
-  return api.get<any[]>(`/receita/recorrentes/${recorrentePaiId}`);
+  return api.get<any[]>(`/receita/recorrentes/${recorrentePaiId}`, true);
 }
 
 export type UpdateReceitaInput = Partial<{

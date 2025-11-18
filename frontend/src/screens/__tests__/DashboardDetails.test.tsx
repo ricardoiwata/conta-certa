@@ -19,6 +19,17 @@ jest.mock("expo-router", () => ({
   useRouter: () => mockRouter,
 }));
 
+jest.mock("@/services/dashboard", () => {
+  const actual = jest.requireActual("@/services/dashboard");
+  const { dashboardData } = jest.requireActual("@/data/dashboard");
+  return {
+    ...actual,
+    getIncomeVsExpenseDetail: jest
+      .fn()
+      .mockResolvedValue(dashboardData.incomeVsExpenseDetail),
+  };
+});
+
 describe("Dashboard detail screens", () => {
   beforeEach(() => {
     jest.clearAllMocks();

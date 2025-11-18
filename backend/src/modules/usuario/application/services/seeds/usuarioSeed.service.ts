@@ -19,7 +19,11 @@ export class UsuarioSeedService implements OnModuleInit {
 
     if (count === 0) {
       const usuarios = [
-        { nome: 'João Victor', email: 'joao@gmail.com' },
+        { 
+          nome: 'João Victor', 
+          email: 'joao@gmail.com',
+          firebaseUid: 'test-user-001' // Test Firebase UID for development
+        },
         // { nome: 'Ricardo Iwata' },
         // { nome: 'Marcos Frota' },
         // { nome: 'Paulo Victor' },

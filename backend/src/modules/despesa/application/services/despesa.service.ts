@@ -35,28 +35,49 @@ export class DespesaService {
     return this.despesaRepository.save(despesa);
   }
 
-  async findAll() {
+  async findAll(firebaseUid?: string) {
+    if (firebaseUid) {
+      return await this.despesaRepository.find({
+        where: { usuarioUid: firebaseUid },
+        relations: ['categoria'],
+      });
+    }
     return await this.despesaRepository.find({
       relations: ['categoria'],
     });
   }
 
-  async findAllRecorrentes() {
+  async findAllRecorrentes(firebaseUid?: string) {
+    if (firebaseUid) {
+      return await this.despesaRepository.find({
+        where: { recorrentePai: true, usuarioUid: firebaseUid },
+        relations: ['categoria'],
+      });
+    }
     return await this.despesaRepository.find({
       where: { recorrentePai: true },
       relations: ['categoria'],
     });
   }
 
-  async findAllRecorrentesFilhas(id: number) {
+  async findAllRecorrentesFilhas(id: number, firebaseUid?: string) {
+    if (firebaseUid) {
+      return await this.despesaRepository.find({
+        where: { recorrentePaiId: id, usuarioUid: firebaseUid },
+      });
+    }
     return await this.despesaRepository.find({
       where: { recorrentePaiId: id },
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, firebaseUid?: string) {
+    const where: any = { id };
+    if (firebaseUid) {
+      where.usuarioUid = firebaseUid;
+    }
     const despesa = await this.despesaRepository.findOne({
-      where: { id },
+      where,
       relations: ['categoria'],
     });
 

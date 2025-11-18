@@ -6,10 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { DespesaService } from '../../application/services/despesa.service';
 import { CreateDespesaDto } from '../../application/dto/create-despesa.dto';
 import { UpdateDespesaDto } from '../../application/dto/update-despesa.dto';
+import { FirebaseAuthGuard } from 'src/auth/firebase-auth.guard';
 
 @Controller('despesa')
 export class DespesaController {
@@ -20,23 +23,32 @@ export class DespesaController {
     return this.despesaService.create(createDespesaDto);
   }
 
-  @Get()
-  findAll() {
-    return this.despesaService.findAll();
-  }
-  @Get('/recorrentes')
-  findAllRecorrentes() {
-    return this.despesaService.findAllRecorrentes();
-  }
-
+  @UseGuards(FirebaseAuthGuard)
   @Get('/recorrentes/:id')
-  findAllRecorrentesFilhas(@Param('id') id: string) {
-    return this.despesaService.findAllRecorrentesFilhas(+id);
+  findAllRecorrentesFilhas(@Param('id') id: string, @Request() req: any) {
+    const firebaseUid = req.firebaseUid;
+    return this.despesaService.findAllRecorrentesFilhas(+id, firebaseUid);
   }
 
+  @UseGuards(FirebaseAuthGuard)
+  @Get('/recorrentes')
+  findAllRecorrentes(@Request() req: any) {
+    const firebaseUid = req.firebaseUid;
+    return this.despesaService.findAllRecorrentes(firebaseUid);
+  }
+
+  @UseGuards(FirebaseAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.despesaService.findOne(+id);
+  findOne(@Param('id') id: string, @Request() req: any) {
+    const firebaseUid = req.firebaseUid;
+    return this.despesaService.findOne(+id, firebaseUid);
+  }
+
+  @UseGuards(FirebaseAuthGuard)
+  @Get()
+  findAll(@Request() req: any) {
+    const firebaseUid = req.firebaseUid;
+    return this.despesaService.findAll(firebaseUid);
   }
 
   @Patch(':id')

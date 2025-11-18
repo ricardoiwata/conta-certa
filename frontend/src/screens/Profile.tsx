@@ -1,23 +1,49 @@
 import { useAuth } from "@/auth/AuthContext";
 import { signOutUser } from "@/services/auth";
 import { useThemePreference, type ThemePreference } from "@/theme/ThemeContext";
-import { dashboardData } from "@/data/dashboard";
 import { modernStyles } from "@/styles/modern.styles";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, ScrollView } from "react-native";
 import { Appbar, Avatar, Button, Card, Text, Menu, IconButton, List, Badge, useTheme } from "react-native-paper";
+import { useFab } from "@/context/FabContext";
+import { getDashboardData } from "@/services/dashboard";
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const router = useRouter();
   const { themePreference, setThemePreference } = useThemePreference();
+  const { setFabVisible } = useFab();
   const [menuVisible, setMenuVisible] = useState(false);
+  const [notificacoes, setNotificacoes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const name = user?.displayName || "Usuário";
-  const email = user?.email || "";
-  const { notificacoes } = dashboardData;
+  const name = profile?.nome || user?.displayName || "Usuário";
+  const email = profile?.email || user?.email || "";
+  const cpf = profile?.cpf;
+  const telefone = profile?.telefone;
   const theme = useTheme();
+
+  useEffect(() => {
+    setFabVisible(false);
+    return () => {
+      setFabVisible(true);
+    };
+  }, [setFabVisible]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const data = await getDashboardData();
+        setNotificacoes(data.notificacoes || []);
+      } catch (e) {
+        console.error("Erro ao carregar notificações:", e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   async function handleLogout() {
     await signOutUser();
@@ -58,21 +84,55 @@ export default function Profile() {
       </Appbar.Header>
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={[modernStyles.modernContainer, { paddingTop: 16 }]}>
-        <Card style={modernStyles.modernCard}>
-          <Card.Content style={[modernStyles.modernCardContent, { flexDirection: "row", alignItems: "center", gap: 16 }]}>
-            <Avatar.Icon size={64} icon="account" />
-            <View style={{ flex: 1 }}>
-              <Text style={[modernStyles.modernTitle, { color: theme.colors.onSurface, marginBottom: 4 }]}>
-                {name}
-              </Text>
-              {!!email && (
-                <Text style={[modernStyles.modernSubtitle, { color: theme.colors.onSurface }]}>
-                  {email}
+        {!profile ? (
+          <>
+            <Card style={modernStyles.modernCard}>
+              <Card.Content style={modernStyles.modernCardContent}>
+                <Text style={[modernStyles.modernTitle, { color: theme.colors.onSurface, marginBottom: 16 }]}>
+                  Perfil Incompleto
                 </Text>
-              )}
-            </View>
-          </Card.Content>
-        </Card>
+                <Text style={[modernStyles.modernSubtitle, { color: theme.colors.onSurface, marginBottom: 16 }]}>
+                  Complete seu perfil para acessar todas as funcionalidades
+                </Text>
+                <Button
+                  mode="contained"
+                  onPress={() => router.push("/complete-profile")}
+                  style={{ marginBottom: 8 }}
+                >
+                  Completar Perfil
+                </Button>
+              </Card.Content>
+            </Card>
+          </>
+        ) : (
+          <>
+            <Card style={modernStyles.modernCard}>
+              <Card.Content style={[modernStyles.modernCardContent, { flexDirection: "row", alignItems: "center", gap: 16 }]}>
+                <Avatar.Icon size={64} icon="account" />
+                <View style={{ flex: 1 }}>
+                  <Text style={[modernStyles.modernTitle, { color: theme.colors.onSurface, marginBottom: 4 }]}>
+                    {name}
+                  </Text>
+                  {!!email && (
+                    <Text style={[modernStyles.modernSubtitle, { color: theme.colors.onSurface }]}>
+                      {email}
+                    </Text>
+                  )}
+                  {cpf && (
+                    <Text style={[modernStyles.modernSubtitle, { color: theme.colors.onSurface, fontSize: 12 }]}>
+                      CPF: {cpf}
+                    </Text>
+                  )}
+                </View>
+                <IconButton
+                  icon="pencil"
+                  size={24}
+                  onPress={() => router.push("/edit-profile")}
+                />
+              </Card.Content>
+            </Card>
+          </>
+        )}
 
         <Card style={modernStyles.modernCard}>
           <Card.Content style={modernStyles.modernCardContent}>

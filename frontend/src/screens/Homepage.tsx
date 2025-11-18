@@ -1,6 +1,6 @@
 import { useAuth } from "@/auth/AuthContext";
 import { useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Dimensions,
   ScrollView,
@@ -8,6 +8,7 @@ import {
   Pressable,
   StyleSheet,
   Animated,
+  LayoutChangeEvent,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
@@ -26,21 +27,24 @@ import {
   Icon,
 } from "react-native-paper";
 import { LinearGradient } from 'expo-linear-gradient';
-import { dashboardData } from "@/data/dashboard";
 import { modernStyles } from "@/styles/modern.styles";
 import { listReceitas, listReceitasRecorrentes } from "@/services/receitas";
 import { listDespesas, listDespesasRecorrentes } from "@/services/despesas";
+import { useFab } from "@/context/FabContext";
+import { getDashboardData, type DashboardData } from "@/services/dashboard";
 
 export default function Homepage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { setFabVisible } = useFab();
 
   useEffect(() => {
+    setFabVisible(true);
     if (!loading && !user) {
       router.replace("/login");
     }
-  }, [loading, user, router]);
+  }, [loading, user, router, setFabVisible]);
 
 
   const greeting = useMemo(() => {
@@ -51,8 +55,8 @@ export default function Homepage() {
   }, []);
 
   const theme = useTheme();
-  const [fabVisible] = useState(true);
   const [fabOpen, setFabOpen] = useState(false);
+  const { fabVisible } = useFab();
   const [chooseType, setChooseType] = useState<null | "income" | "expense">(
     null
   );
@@ -67,8 +71,7 @@ export default function Homepage() {
   >(null);
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [summaryError, setSummaryError] = useState<string | null>(null);
-  const [receitas, setReceitas] = useState<any[]>([]);
-  const [despesas, setDespesas] = useState<any[]>([]);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   
   // Animação para o card de saldo
   const balanceAnimation = useState(new Animated.Value(0))[0];
@@ -86,30 +89,39 @@ export default function Homepage() {
   const displayName = user?.displayName || user?.email || "Usuário";
 
   const {
-    balance,
-    labels,
-    receita,
-    despesa,
-    totalReceitasRecebidas,
-    totalDespesasPagas,
-    receitasPendentes,
-    despesasPendentes,
-    proximos7Dias,
-    alertas,
-    categorias,
-    notificacoes,
-    dica,
-  } = dashboardData;
+    balance = 0,
+    labels = [],
+    receita = [],
+    despesa = [],
+    totalReceitasRecebidas = 0,
+    totalDespesasPagas = 0,
+    receitasPendentes = 0,
+    despesasPendentes = 0,
+    proximos7Dias = [],
+    alertas = [],
+    categorias = [],
+    notificacoes = [],
+    dica = "Mantenha o controle de suas despesas.",
+  } = dashboardData || {};
 
   const screenWidth = Dimensions.get("window").width;
   const horizontalPadding = 16;
   const cardPadding = 16; // Padding interno do Card.Content
+  const [incomeChartWidth, setIncomeChartWidth] = useState(() =>
+    Math.max(220, screenWidth - horizontalPadding * 2 - cardPadding * 2 - 12),
+  );
+  const handleIncomeChartLayout = useCallback((event: LayoutChangeEvent) => {
+    const width = event.nativeEvent.layout.width;
+    if (width <= 0) return;
+    const nextWidth = Math.max(220, width - 8);
+    setIncomeChartWidth((previous) =>
+      Math.abs(previous - nextWidth) < 1 ? previous : nextWidth,
+    );
+  }, []);
 
   const projecaoSaldoFinal = balance + receitasPendentes - despesasPendentes;
 
   const totalCategorias = categorias.reduce((acc, c) => acc + c.valor, 0) || 1;
-
-  // Animação de entrada do card de saldo
   useEffect(() => {
     Animated.parallel([
       Animated.timing(balanceAnimation, {
@@ -181,9 +193,8 @@ export default function Homepage() {
         try {
           setSummaryError(null);
           setSummaryLoading(true);
-          const [r, d] = await Promise.all([listReceitas(), listDespesas()]);
-          setReceitas(r || []);
-          setDespesas(d || []);
+          const data = await getDashboardData();
+          setDashboardData(data);
         } catch (e: any) {
           setSummaryError(e?.message || "Falha ao carregar resumo");
         } finally {
@@ -211,57 +222,6 @@ export default function Homepage() {
       }
     })();
   }, [chooseRecurringStep]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        setSummaryError(null);
-        setSummaryLoading(true);
-        const [r, d] = await Promise.all([listReceitas(), listDespesas()]);
-        setReceitas(r || []);
-        setDespesas(d || []);
-      } catch (e: any) {
-        setSummaryError(e?.message || "Falha ao carregar resumo");
-      } finally {
-        setSummaryLoading(false);
-      }
-    })();
-  }, []);
-
-  function parseDateFlexible(s?: any): Date | null {
-    if (!s) return null;
-    if (typeof s === "string") {
-      if (s.includes("/")) {
-        const [dd, mm, yyyy] = s.split("/");
-        const d = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
-        return isNaN(d.getTime()) ? null : d;
-      }
-      const d = new Date(s);
-      return isNaN(d.getTime()) ? null : d;
-    }
-    if (s instanceof Date) return s;
-    return null;
-  }
-
-  const now = new Date();
-  const m = now.getMonth();
-  const y = now.getFullYear();
-
-  const apiTotalReceitasRecebidas = receitas
-    .filter((x) => x.realizada)
-    .filter((x) => {
-      const d = parseDateFlexible(x.dataCompetencia || x.data);
-      return d && d.getMonth() === m && d.getFullYear() === y;
-    })
-    .reduce((acc, x) => acc + Number(x.valor || 0), 0);
-
-  const apiTotalDespesasPagas = despesas
-    .filter((x) => x.realizada)
-    .filter((x) => {
-      const d = parseDateFlexible(x.data);
-      return d && d.getMonth() === m && d.getFullYear() === y;
-    })
-    .reduce((acc, x) => acc + Number(x.valor || 0), 0);
 
   return (
     <View style={{ flex: 1 }}>
@@ -382,7 +342,7 @@ export default function Homepage() {
                   {new Intl.NumberFormat("pt-BR", {
                     style: "currency",
                     currency: "BRL",
-                  }).format(apiTotalReceitasRecebidas)}
+                  }).format(totalReceitasRecebidas)}
                 </Text>
               </View>
               <View style={modernStyles.modernColumn}>
@@ -396,7 +356,7 @@ export default function Homepage() {
                   {new Intl.NumberFormat("pt-BR", {
                     style: "currency",
                     currency: "BRL",
-                  }).format(apiTotalDespesasPagas)}
+                  }).format(totalDespesasPagas)}
                 </Text>
               </View>
             </View>
@@ -442,59 +402,57 @@ export default function Homepage() {
             >
               Receita x Despesa
             </Text>
-            <LineChart
-              data={{
-                labels: [...labels],
-                datasets: [
-                  {
-                    data: [...receita],
-                    color: () => theme.colors.primary,
-                    strokeWidth: 3,
+            <View style={{ width: "100%", marginTop: 4 }} onLayout={handleIncomeChartLayout}>
+              <LineChart
+                data={{
+                  labels: [...labels],
+                  datasets: [
+                    {
+                      data: [...receita],
+                      color: () => theme.colors.primary,
+                      strokeWidth: 3,
+                    },
+                    {
+                      data: [...despesa],
+                      color: () => theme.colors.error,
+                      strokeWidth: 3,
+                    },
+                  ],
+                  legend: ["Receita", "Despesa"],
+                }}
+                width={incomeChartWidth}
+                height={180}
+                yAxisLabel="R$ "
+                yAxisSuffix=""
+                chartConfig={{
+                  backgroundColor: theme.colors.surface,
+                  backgroundGradientFrom: theme.colors.surface,
+                  backgroundGradientTo: theme.colors.surface,
+                  decimalPlaces: 0,
+                  color: () => theme.colors.onSurface,
+                  labelColor: () => theme.colors.onSurface,
+                  propsForLabels: {
+                    fontSize: 12,
+                    fontWeight: '600',
+                    fontFamily: 'System',
+                    fill: theme.colors.onSurface
                   },
-                  {
-                    data: [...despesa],
-                    color: () => theme.colors.error,
-                    strokeWidth: 3,
+                  propsForDots: { r: "3", strokeWidth: "1.5" },
+                  propsForBackgroundLines: {
+                    stroke: theme.colors.outline + '40',
+                    strokeDasharray: "2 4",
                   },
-                ],
-                legend: ["Receita", "Despesa"],
-              }}
-              width={screenWidth - horizontalPadding * 2 - cardPadding * 2 - 8}
-              height={180}
-              yAxisLabel="R$ "
-              yAxisSuffix=""
-              chartConfig={{
-                backgroundColor: theme.colors.surface,
-                backgroundGradientFrom: theme.colors.surface,
-                backgroundGradientTo: theme.colors.surface,
-                decimalPlaces: 0,
-                color: () => theme.colors.onSurface,
-                labelColor: () => theme.colors.onSurface,
-                propsForLabels: { 
-                  fontSize: 12,
-                  fontWeight: '600',
-                  fontFamily: 'System',
-                  fill: theme.colors.onSurface
-                },
-                propsForDots: { r: "3", strokeWidth: "1.5" },
-                propsForBackgroundLines: {
-                  stroke: theme.colors.outline + '40',
-                  strokeDasharray: "2 4",
-                },
-                useShadowColorFromDataset: false,
-              }}
-              bezier
-              withShadow={false}
-              withVerticalLines={false}
-              withHorizontalLines={true}
-              withInnerLines={false}
-              withOuterLines={false}
-              style={{ 
-                marginVertical: 8, 
-                marginHorizontal: 4,
-                borderRadius: 8
-              }}
-            />
+                  useShadowColorFromDataset: false,
+                }}
+                bezier
+                withShadow={false}
+                withVerticalLines={false}
+                withHorizontalLines={true}
+                withInnerLines={false}
+                withOuterLines={false}
+                style={{ marginVertical: 8, borderRadius: 8 }}
+              />
+            </View>
           </Card.Content>
         </Card>
 

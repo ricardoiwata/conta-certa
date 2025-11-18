@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateNotificacaoDto } from '../dto/create-notificacao.dto';
 import { UpdateNotificacaoDto } from '../dto/update-notificacao.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Notificacao } from 'src/notificacao/domain/entities/notificacao.entity';
+import { Notificacao } from 'src/modules/notificacao/domain/entities/notificacao.entity';
 import { In, Repository } from 'typeorm';
 import { Usuario } from 'src/modules/usuario/domain/entities/usuario.entity';
 

@@ -7,7 +7,9 @@ import { ReceitaModule } from './modules/receita/receita.module';
 import { CategoriaModule } from './modules/categoria/categoria.module';
 import { UsuarioModule } from './modules/usuario/usuario.module';
 import { PreferenciasNotificacaoModule } from './modules/preferencias-notificacao/preferencias-notificacao.module';
-import { NotificacaoModule } from './notificacao/notificacao.module';
+import { NotificacaoModule } from './modules/notificacao/notificacao.module';
+import { AuthModule } from './auth/auth.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { NotificacaoModule } from './notificacao/notificacao.module';
     UsuarioModule,
     PreferenciasNotificacaoModule,
     NotificacaoModule,
+    AuthModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

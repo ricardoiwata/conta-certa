@@ -1,17 +1,33 @@
-import { dashboardData } from "@/data/dashboard";
 import DetailScaffold from "./DetailScaffold";
 import { formatCurrency } from "@/utils/formatCurrency";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, List, Text, useTheme } from "react-native-paper";
+import { getDashboardData } from "@/services/dashboard";
 
 export default function UpcomingEventsDetailScreen() {
   const theme = useTheme();
+  const [proximos7Dias, setProximos7Dias] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const data = await getDashboardData();
+        setProximos7Dias(data.proximos7Dias || []);
+      } catch (e) {
+        console.error("Erro ao carregar próximos 7 dias:", e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   return (
     <DetailScaffold title="Próximos 7 dias" description="Eventos financeiros programados para a próxima semana.">
       <Card>
         <Card.Content style={{ gap: 8 }}>
-          {dashboardData.proximos7Dias.map((item) => (
+          {proximos7Dias.map((item) => (
             <List.Item
               key={item.id}
               title={`${item.titulo} · ${formatCurrency(item.valor)}`}

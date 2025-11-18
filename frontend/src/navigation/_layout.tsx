@@ -4,23 +4,26 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useTheme } from "react-native-paper";
 import { AppThemeProvider } from "../theme/provider";
+import { FabProvider } from "../context/FabContext";
 
 function ThemedShell() {
   const theme = useTheme();
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <StatusBar
-          style={theme.dark ? "light" : "dark"}
-          translucent={false}
-          backgroundColor={theme.colors.background}
-        />
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: theme.colors.background }}
-          edges={["top", "left", "right"]}
-        >
-          <Stack screenOptions={{ headerShown: false }} />
-        </SafeAreaView>
+        <FabProvider>
+          <StatusBar
+            style={theme.dark ? "light" : "dark"}
+            translucent={false}
+            backgroundColor={theme.colors.background}
+          />
+          <SafeAreaView
+            style={{ flex: 1, backgroundColor: theme.colors.background }}
+            edges={["top", "left", "right"]}
+          >
+            <Stack screenOptions={{ headerShown: false }} />
+          </SafeAreaView>
+        </FabProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );

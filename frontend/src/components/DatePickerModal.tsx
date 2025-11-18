@@ -113,7 +113,7 @@ export default function DatePickerModal({ visible, onDismiss, onConfirm, initial
         </Dialog.Content>
         <Dialog.Actions>
           <Button onPress={onDismiss}>Cancelar</Button>
-          <Button onPress={() => { if (selected) { const [y,m,d] = selected.split("-"); const dt = new Date(Number(y), Number(m)-1, Number(d)); onConfirm(toBR(dt)); } onDismiss(); }} disabled={!selected}>
+          <Button onPress={() => { if (selected) { const dt = new Date(selected); onConfirm(toBR(dt)); onDismiss(); } }} disabled={!selected}>
             Confirmar
           </Button>
         </Dialog.Actions>

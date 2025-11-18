@@ -21,19 +21,19 @@ export async function createDespesa(input: CreateDespesaInput) {
 }
 
 export async function listDespesas() {
-  return api.get<any[]>("/despesa");
+  return api.get<any[]>("/despesa", true);
 }
 
 export async function getDespesa(id: number) {
-  return api.get<any>(`/despesa/${id}`);
+  return api.get<any>(`/despesa/${id}`, true);
 }
 
 export async function listDespesasRecorrentes() {
-  return api.get<any[]>("/despesa/recorrentes");
+  return api.get<any[]>("/despesa/recorrentes", true);
 }
 
 export async function listDespesasRecorrentesFilhas(recorrentePaiId: number) {
-  return api.get<any[]>(`/despesa/recorrentes/${recorrentePaiId}`);
+  return api.get<any[]>(`/despesa/recorrentes/${recorrentePaiId}`, true);
 }
 
 export type UpdateDespesaInput = Partial<{
