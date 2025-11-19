@@ -63,6 +63,7 @@ export default function CompleteProfileScreen() {
   return (
     <View style={{ flex: 1 }}>
       <Appbar.Header>
+        <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="Completar Perfil" />
       </Appbar.Header>
 

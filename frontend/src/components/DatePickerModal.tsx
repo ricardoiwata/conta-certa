@@ -74,6 +74,16 @@ export default function DatePickerModal({ visible, onDismiss, onConfirm, initial
     return rows;
   }, [cursor]);
 
+  const handleConfirm = () => {
+    if (selected) {
+      // Parse ISO date string directly without timezone conversion
+      const [year, month, day] = selected.split('-').map(Number);
+      const dt = new Date(year, month - 1, day);
+      onConfirm(toBR(dt));
+      onDismiss();
+    }
+  };
+
   return (
     <Portal>
       <Dialog visible={visible} onDismiss={onDismiss}>
@@ -87,8 +97,8 @@ export default function DatePickerModal({ visible, onDismiss, onConfirm, initial
             <IconButton icon="chevron-right" onPress={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))} />
           </View>
           <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 6 }}>
-            {["S", "T", "Q", "Q", "S", "S", "D"].map((h) => (
-              <Text key={h} style={{ width: 32, textAlign: "center", opacity: 0.6 }}>{h}</Text>
+            {["S", "T", "Q", "Q", "S", "S", "D"].map((h, idx) => (
+              <Text key={`header-${idx}`} style={{ width: 32, textAlign: "center", opacity: 0.6 }}>{h}</Text>
             ))}
           </View>
           {days.map((row, idx) => (
@@ -113,7 +123,7 @@ export default function DatePickerModal({ visible, onDismiss, onConfirm, initial
         </Dialog.Content>
         <Dialog.Actions>
           <Button onPress={onDismiss}>Cancelar</Button>
-          <Button onPress={() => { if (selected) { const dt = new Date(selected); onConfirm(toBR(dt)); onDismiss(); } }} disabled={!selected}>
+          <Button onPress={handleConfirm} disabled={!selected}>
             Confirmar
           </Button>
         </Dialog.Actions>

@@ -627,6 +627,18 @@ export default function Homepage() {
               ]}
             />
           )}
+          <FAB
+            icon="brain"
+            onPress={() => {
+              router.push("/chatbot");
+            }}
+            color={theme.colors.primary}
+            style={{
+              position: "absolute",
+              bottom: Math.max(insets.bottom + 16, 16),
+              left: 16,
+            }}
+          />
           <FAB.Group
             open={fabOpen}
             visible
