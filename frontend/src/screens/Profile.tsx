@@ -95,14 +95,9 @@ export default function Profile() {
         return dataReceita >= inicio && dataReceita <= fim;
       });
 
-      // Debug: Log das despesas e receitas
-      console.log("Despesas filtradas para relatório:", despesasFiltradas);
-      console.log("Receitas filtradas para relatório:", receitasFiltradas);
-
       const despesasMap = despesasFiltradas.map((d: any) => {
         let categoria = "Sem categoria";
         
-        // Tenta diferentes formas de acessar a categoria
         if (d.categoria) {
           if (typeof d.categoria === 'string') {
             categoria = d.categoria;

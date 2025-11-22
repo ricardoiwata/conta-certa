@@ -1,14 +1,26 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PreferenciasNotificacaoController } from './preferencias-notificacao.controller';
-import { PreferenciasNotificacaoService } from './preferencias-notificacao.service';
+import { PreferenciasNotificacaoService } from '../../application/services/preferencias-notificacao.service';
 
 describe('PreferenciasNotificacaoController', () => {
   let controller: PreferenciasNotificacaoController;
+  const mockService = {
+    findAll: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    remove: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PreferenciasNotificacaoController],
-      providers: [PreferenciasNotificacaoService],
+      providers: [
+        {
+          provide: PreferenciasNotificacaoService,
+          useValue: mockService,
+        },
+      ],
     }).compile();
 
     controller = module.get<PreferenciasNotificacaoController>(PreferenciasNotificacaoController);

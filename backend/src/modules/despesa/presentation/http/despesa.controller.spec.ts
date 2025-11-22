@@ -3,6 +3,7 @@ import { DespesaController } from './despesa.controller';
 import { DespesaService } from '../../application/services/despesa.service';
 import { CreateDespesaDto } from '../../application/dto/create-despesa.dto';
 import { UpdateDespesaDto } from '../../application/dto/update-despesa.dto';
+import { FirebaseAuthGuard } from 'src/auth/firebase-auth.guard';
 
 describe('DespesaController', () => {
   let controller: DespesaController;
@@ -19,6 +20,7 @@ describe('DespesaController', () => {
   };
 
   const mockDespesa = { id: 1, descricao: 'Teste' };
+  const mockRequest = { firebaseUid: 'test-uid' };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,8 +30,19 @@ describe('DespesaController', () => {
           provide: DespesaService,
           useValue: mockDespesaService,
         },
+        {
+          provide: FirebaseAuthGuard,
+          useValue: {
+            canActivate: jest.fn().mockReturnValue(true),
+          },
+        },
       ],
-    }).compile();
+    })
+      .overrideGuard(FirebaseAuthGuard)
+      .useValue({
+        canActivate: jest.fn().mockReturnValue(true),
+      })
+      .compile();
 
     controller = module.get<DespesaController>(DespesaController);
     service = module.get<DespesaService>(DespesaService);
@@ -49,24 +62,26 @@ describe('DespesaController', () => {
 
   it('deve chamar service.findAll ao buscar todas as despesas', () => {
     mockDespesaService.findAll.mockResolvedValue([mockDespesa]);
-    controller.findAll();
+    controller.findAll(mockRequest);
     expect(service.findAll).toHaveBeenCalled();
   });
 
   it('deve chamar service.findAllRecorrentes', () => {
-    controller.findAllRecorrentes();
+    mockDespesaService.findAllRecorrentes.mockResolvedValue([]);
+    controller.findAllRecorrentes(mockRequest);
     expect(service.findAllRecorrentes).toHaveBeenCalled();
   });
 
   it('deve chamar service.findAllRecorrentesFilhas com o ID correto', () => {
-    controller.findAllRecorrentesFilhas('5');
-    expect(service.findAllRecorrentesFilhas).toHaveBeenCalledWith(5);
+    mockDespesaService.findAllRecorrentesFilhas.mockResolvedValue([]);
+    controller.findAllRecorrentesFilhas('5', mockRequest);
+    expect(service.findAllRecorrentesFilhas).toHaveBeenCalledWith(5, 'test-uid');
   });
 
   it('deve chamar service.findOne com o ID correto', () => {
     mockDespesaService.findOne.mockResolvedValue(mockDespesa);
-    controller.findOne('1');
-    expect(service.findOne).toHaveBeenCalledWith(1);
+    controller.findOne('1', mockRequest);
+    expect(service.findOne).toHaveBeenCalledWith(1, 'test-uid');
   });
 
   it('deve chamar service.update com os parâmetros corretos', () => {

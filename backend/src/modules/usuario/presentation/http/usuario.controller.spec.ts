@@ -3,6 +3,7 @@ import { UsuarioController } from './usuario.controller';
 import { UsuarioService } from '../../application/services/usuario.service';
 import { CreateUsuarioDto } from '../../application/dto/create-usuario.dto';
 import { UpdateUsuarioDto } from '../../application/dto/update-usuario.dto';
+import { FirebaseAuthGuard } from 'src/auth/firebase-auth.guard';
 
 const mockUsuarioService = {
   create: jest.fn(),
@@ -16,7 +17,15 @@ describe('UsuarioController', () => {
   let controller: UsuarioController;
   let service: UsuarioService;
 
-  const mockUsuario = { id: 1, nome: 'Teste', email: 'teste@teste.com' };
+  const mockUsuario = { 
+    id: 1, 
+    nome: 'Teste', 
+    email: 'teste@teste.com',
+    firebaseUid: 'test-uid',
+    criadoEm: new Date(),
+    atualizadoEm: new Date(),
+    notificacoes: [],
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,8 +35,19 @@ describe('UsuarioController', () => {
           provide: UsuarioService,
           useValue: mockUsuarioService,
         },
+        {
+          provide: FirebaseAuthGuard,
+          useValue: {
+            canActivate: jest.fn().mockReturnValue(true),
+          },
+        },
       ],
-    }).compile();
+    })
+      .overrideGuard(FirebaseAuthGuard)
+      .useValue({
+        canActivate: jest.fn().mockReturnValue(true),
+      })
+      .compile();
 
     controller = module.get<UsuarioController>(UsuarioController);
     service = module.get<UsuarioService>(UsuarioService);

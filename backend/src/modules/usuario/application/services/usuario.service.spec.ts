@@ -5,6 +5,7 @@ import { UsuarioService } from './usuario.service';
 import { Usuario } from '../../domain/entities/usuario.entity';
 import { NotFoundException } from '@nestjs/common';
 import { CreateUsuarioDto } from '../dto/create-usuario.dto';
+import { PreferenciasNotificacao } from 'src/modules/preferencias-notificacao/domain/entities/preferencias-notificacao.entity';
 
 const mockUsuarioRepo = {
   create: jest.fn(),
@@ -15,11 +16,25 @@ const mockUsuarioRepo = {
   delete: jest.fn(),
 };
 
+const mockPreferenciasNotificacaoRepo = {
+  create: jest.fn(),
+  save: jest.fn(),
+  findOneBy: jest.fn(),
+};
+
 describe('UsuarioService', () => {
   let service: UsuarioService;
   let repository: Repository<Usuario>;
 
-  const mockUsuario: Usuario = { id: 1, nome: 'João Teste', email: 'joao@teste.com' };
+  const mockUsuario: Usuario = {
+    id: 1,
+    nome: 'João Teste',
+    email: 'joao@teste.com',
+    firebaseUid: 'firebase-uid-123',
+    criadoEm: new Date(),
+    atualizadoEm: new Date(),
+    notificacoes: [],
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,6 +43,10 @@ describe('UsuarioService', () => {
         {
           provide: getRepositoryToken(Usuario),
           useValue: mockUsuarioRepo,
+        },
+        {
+          provide: getRepositoryToken(PreferenciasNotificacao),
+          useValue: mockPreferenciasNotificacaoRepo,
         },
       ],
     }).compile();
@@ -43,10 +62,25 @@ describe('UsuarioService', () => {
 
   describe('create', () => {
     it('deve criar um usuário com sucesso', async () => {
-      const dto: CreateUsuarioDto = { nome: 'João Teste', email: 'joao@teste.com' };
+      const dto: CreateUsuarioDto = {
+        firebaseUid: 'firebase-uid-123',
+        nome: 'João Teste',
+        email: 'joao@teste.com',
+      };
       
       mockUsuarioRepo.create.mockReturnValue(mockUsuario);
       mockUsuarioRepo.save.mockResolvedValue(mockUsuario);
+      mockPreferenciasNotificacaoRepo.create.mockReturnValue({
+        usuarioId: 1,
+      });
+      mockPreferenciasNotificacaoRepo.findOneBy.mockResolvedValue({
+        id: 1,
+        usuarioId: 1,
+      });
+      mockPreferenciasNotificacaoRepo.save.mockResolvedValue({
+        id: 1,
+        usuarioId: 1,
+      });
 
       const result = await service.create(dto);
 
@@ -89,8 +123,15 @@ describe('UsuarioService', () => {
   describe('update', () => {
     it('deve atualizar um usuário e retorná-lo', async () => {
       const updateDto = { nome: 'João Atualizado' };
-      const mockUsuario: Usuario = { id: 1, nome: 'João Teste', email: 'joao@teste.com' };
-      const updatedUsuario = { ...mockUsuario, ...updateDto };
+      const updatedUsuario: Usuario = {
+        id: 1,
+        nome: 'João Atualizado',
+        email: 'joao@teste.com',
+        firebaseUid: 'firebase-uid-123',
+        criadoEm: new Date(),
+        atualizadoEm: new Date(),
+        notificacoes: [],
+      };
 
       jest.spyOn(service, 'findOne').mockResolvedValue(updatedUsuario);
       mockUsuarioRepo.update.mockResolvedValue(undefined);

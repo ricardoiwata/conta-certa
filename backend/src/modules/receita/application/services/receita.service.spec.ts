@@ -27,7 +27,7 @@ describe('ReceitaService', () => {
     dataCompetencia: new Date(),
     origem: 'Fixo',
     recorrentePai: false,
-    recorrentePaiId: null,
+    recorrentePaiId: 0,
     realizada: true,
     usuarioUid: 'test-uid',
   };

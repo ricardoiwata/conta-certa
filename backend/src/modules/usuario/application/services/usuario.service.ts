@@ -26,12 +26,6 @@ export class UsuarioService {
       });
     await this.preferenciasNotificacaoRepository.save(preferenciasNotificacao);
 
-    console.log(
-      await this.preferenciasNotificacaoRepository.findOneBy({
-        id: preferenciasNotificacao.id,
-      }),
-    );
-
     return usuarioSalvo;
   }
 
