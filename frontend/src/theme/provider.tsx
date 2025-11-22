@@ -20,9 +20,8 @@ function ThemeProviderInner({ children }: { children: React.ReactNode }) {
   const systemScheme = useColorScheme();
   const { themePreference, isLoading } = useThemePreference();
   
-  // Determina o modo baseado na preferência do usuário
   const mode: "light" | "dark" = useMemo(() => {
-    if (isLoading) return "light"; // Fallback durante carregamento
+    if (isLoading) return "light"; 
     
     switch (themePreference) {
       case 'light':

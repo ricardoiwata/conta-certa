@@ -3,11 +3,11 @@ import { api } from "./api";
 export type CreateReceitaInput = {
   descricao: string;
   valor: number;
-  data: string; // yyyy-mm-dd or dd/mm/yyyy
-  dataCompetencia: string; // yyyy-mm-dd or dd/mm/yyyy
+  data: string; 
+  dataCompetencia: string; 
   origem: "Fixo" | "Variável" | string;
   recorrentePai: boolean;
-  recorrentePaiId?: number; // default 0
+  recorrentePaiId?: number; 
   realizada: boolean;
   usuarioUid: string;
 };

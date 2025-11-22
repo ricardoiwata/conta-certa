@@ -1,7 +1,6 @@
 import { StyleSheet } from 'react-native';
 
 export const modernStyles = StyleSheet.create({
-  // Cards modernos
   modernCard: {
     borderRadius: 16,
     elevation: 2,
@@ -19,7 +18,6 @@ export const modernStyles = StyleSheet.create({
     padding: 20,
   },
   
-  // Títulos modernos
   modernTitle: {
     fontSize: 18,
     fontWeight: '700',
@@ -40,7 +38,6 @@ export const modernStyles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   
-  // Layout moderno
   modernRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -51,7 +48,6 @@ export const modernStyles = StyleSheet.create({
     flex: 1,
   },
   
-  // Espaçamentos modernos
   modernGap: {
     gap: 16,
   },
@@ -60,20 +56,17 @@ export const modernStyles = StyleSheet.create({
     gap: 12,
   },
   
-  // Botões modernos
   modernButton: {
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 24,
   },
   
-  // Container principal moderno
   modernContainer: {
     paddingHorizontal: 20,
     gap: 16,
   },
   
-  // Header moderno
   modernHeader: {
     paddingVertical: 20,
     paddingHorizontal: 4,
@@ -93,14 +86,12 @@ export const modernStyles = StyleSheet.create({
     marginTop: 4,
   },
   
-  // Ícones modernos
   modernIconContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 12,
     padding: 8,
   },
   
-  // Badge moderno
   modernBadge: {
     borderRadius: 12,
     paddingHorizontal: 8,
@@ -117,7 +108,6 @@ export const modernStyles = StyleSheet.create({
     color: 'white',
   },
   
-  // Card de saldo especial
   balanceCard: {
     borderRadius: 20,
     elevation: 4,

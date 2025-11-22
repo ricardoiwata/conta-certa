@@ -3,10 +3,10 @@ import { api } from "./api";
 export type CreateDespesaInput = {
   descricao: string;
   valor: number;
-  data: string; // yyyy-mm-dd or dd/mm/yyyy
+  data: string; 
   formaPagamento: "Débito" | "Cheque" | "Crédito" | "Pix" | "Dinheiro" | "Boleto" | string;
   recorrentePai: boolean;
-  recorrentePaiId?: number; // default 0
+  recorrentePaiId?: number; 
   realizada: boolean;
   usuarioUid: string;
   categoriaId: number;

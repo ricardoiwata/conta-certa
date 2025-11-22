@@ -1,7 +1,5 @@
 import '@testing-library/jest-native/extend-expect';
 import 'react-native-gesture-handler/jestSetup';
-import React from 'react';
-import { View } from 'react-native';
 
 // Mock Reanimated (v3 compatible)
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -9,6 +7,10 @@ jest.mock('react-native-reanimated', () => require('react-native-reanimated/mock
 
 // Simplify chart-kit components for tests
 jest.mock('react-native-chart-kit', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const React = require('react');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { View } = require('react-native');
   const MockLineChart = (props: any) => React.createElement(View, { accessibilityLabel: 'line-chart', ...props });
   MockLineChart.displayName = 'MockLineChart';
   return {
@@ -18,6 +20,10 @@ jest.mock('react-native-chart-kit', () => {
 
 // Avoid async icon font loading during tests
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const React = require('react');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { View } = require('react-native');
   const MockIcon = () => React.createElement(View, { accessibilityLabel: 'icon' });
   MockIcon.displayName = 'MockMaterialCommunityIcon';
   return MockIcon;

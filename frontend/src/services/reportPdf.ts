@@ -48,7 +48,6 @@ export async function generateCompleteReport(
     const htmlContent = generateHTMLReport(despesas, receitas, dataInicio, dataFim, userName);
 
     if (Platform.OS === 'web') {
-      // Web: download direto como HTML
       const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
@@ -59,9 +58,7 @@ export async function generateCompleteReport(
       link.click();
       document.body.removeChild(link);
       } else {
-      // Mobile: gerar PDF em base64 e compartilhar
       try {
-        // Gerar nome com data formatada
         const agora = new Date();
         const dia = String(agora.getDate()).padStart(2, '0');
         const mes = String(agora.getMonth() + 1).padStart(2, '0');
@@ -69,14 +66,12 @@ export async function generateCompleteReport(
         const fileName = `relatorio-financeiro-${dia}-${mes}-${ano}.pdf`;
         const filePath = `${documentDirectory}${fileName}`;
 
-        // Gerar PDF em base64
         const pdf = await Print.printToFileAsync({
           html: htmlContent,
           base64: true,
         });
 
         if (pdf?.uri) {
-          // Ler o PDF gerado e salvar com nome customizado
           const base64Data = await readAsStringAsync(pdf.uri, {
             encoding: 'base64',
           });
@@ -85,7 +80,6 @@ export async function generateCompleteReport(
             encoding: 'base64',
           });
 
-          // Compartilhar o PDF com nome correto
           await Sharing.shareAsync(filePath, {
             mimeType: 'application/pdf',
             dialogTitle: 'Compartilhar Relatório',
@@ -95,7 +89,6 @@ export async function generateCompleteReport(
         }
       } catch (pdfError) {
         console.error("Erro ao gerar PDF:", pdfError);
-        // Fallback para HTML se PDF falhar
         const fileName = `relatorio-completo-${Date.now()}.html`;
         const filePath = `${documentDirectory}${fileName}`;
         await writeAsStringAsync(filePath, htmlContent);
@@ -111,7 +104,6 @@ export async function generateCompleteReport(
   }
 }
 
-// Para manter compatibilidade com chamadas antigas
 export const generateExpensesReport = generateCompleteReport;
 
 function generateHTMLReport(
@@ -427,18 +419,24 @@ function agruparPorOrigem(items: { origem?: string; valor: number }[]): Record<s
   );
 }
 
-function formatarData(dataStr: string): string {
+function formatarData(dataStr: any): string {
   if (!dataStr) return "Data inválida";
   
   try {
     let date: Date;
     
     if (typeof dataStr === 'object' && dataStr !== null) {
-      if ('_seconds' in dataStr) {
-        date = new Date(dataStr._seconds * 1000);
-      } else if ('toDate' in dataStr) {
-        date = dataStr.toDate();
+      // Firestore timestamp-like object with _seconds
+      if (typeof (dataStr as any)._seconds === 'number') {
+        date = new Date((dataStr as any)._seconds * 1000);
+      // Objects exposing toDate() method (e.g., Firestore Timestamp)
+      } else if (typeof (dataStr as any).toDate === 'function') {
+        date = (dataStr as any).toDate();
+      // If it's already a Date
+      } else if (dataStr instanceof Date) {
+        date = dataStr;
       } else {
+        // Fallback: attempt to stringify and parse
         date = new Date(JSON.stringify(dataStr));
       }
     } else if (typeof dataStr === 'string' && (dataStr.includes('T') || (dataStr.length === 10 && dataStr.includes('-')))) {
@@ -446,6 +444,8 @@ function formatarData(dataStr: string): string {
     } else if (typeof dataStr === 'string' && /^\d+$/.test(dataStr)) {
       const num = parseInt(dataStr);
       date = new Date(num > 1000000000000 ? num : num * 1000);
+    } else if (typeof dataStr === 'number') {
+      date = new Date(dataStr > 1000000000000 ? dataStr : dataStr * 1000);
     } else if (typeof dataStr === 'string') {
       date = new Date(dataStr);
     } else {

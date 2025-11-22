@@ -21,7 +21,6 @@ export function ThemePreferenceProvider({ children }: { children: React.ReactNod
   const [themePreference, setThemePreferenceState] = useState<ThemePreference>('system');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Carrega a preferência salva ao inicializar
   useEffect(() => {
     loadThemePreference();
   }, []);

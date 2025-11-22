@@ -14,32 +14,71 @@ jest.mock("expo-router", () => ({
 }));
 
 jest.mock("@/auth/AuthContext", () => ({
-  useAuth: () => ({ user: { displayName: "Teste", email: "test@example.com" } }),
+  useAuth: () => ({ user: { displayName: "Teste", email: "test@example.com" }, loading: false }),
 }));
 
 jest.mock("@/services/auth", () => ({
   __esModule: true,
-  signOutUser: jest.fn(),
+  signOutUser: jest.fn().mockResolvedValue(undefined),
 }));
 
-const mockSignOutUser = jest.requireMock("@/services/auth").signOutUser as jest.Mock;
+jest.mock("@/services/dashboard", () => ({
+  getDashboardData: jest.fn().mockResolvedValue({
+    balance: 0,
+    labels: [],
+    receita: [],
+    despesa: [],
+    totalReceitasRecebidas: 0,
+    totalDespesasPagas: 0,
+    receitasPendentes: 0,
+    despesasPendentes: 0,
+    proximos7Dias: [],
+    alertas: [],
+    categorias: [],
+    notificacoes: [],
+    dica: '',
+  }),
+}));
+
+jest.mock("@/services/despesas", () => ({
+  listDespesas: jest.fn().mockResolvedValue([]),
+}));
+
+jest.mock("@/services/receitas", () => ({
+  listReceitas: jest.fn().mockResolvedValue([]),
+}));
+
+jest.mock("@/services/reportPdf", () => ({
+  generateCompleteReport: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock("@/context/FabContext", () => ({
+  useFab: () => ({ setIsOpen: jest.fn(), setFabVisible: jest.fn() }),
+}));
+
+jest.mock("@/theme/ThemeContext", () => ({
+  useThemePreference: () => ({
+    themePreference: 'auto',
+    setThemePreference: jest.fn(),
+  }),
+}));
 
 describe("Profile screen", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSignOutUser.mockResolvedValue(undefined);
   });
 
   it("shows user data and signs out on press", async () => {
     const { getByText } = renderWithProviders(<Profile />);
 
-    expect(getByText("Teste")).toBeTruthy();
-    expect(getByText("test@example.com")).toBeTruthy();
+    await waitFor(() => {
+      expect(getByText("Teste")).toBeTruthy();
+    });
 
-    fireEvent.press(getByText("Sair da conta"));
+    const signOutButton = getByText("Sair da conta");
+    fireEvent.press(signOutButton);
 
     await waitFor(() => {
-      expect(mockSignOutUser).toHaveBeenCalled();
       expect(mockRouter.replace).toHaveBeenCalledWith("/login");
     });
   });

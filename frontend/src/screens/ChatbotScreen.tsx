@@ -60,7 +60,7 @@ export default function ChatbotScreen() {
   const handleSend = async () => {
     if (!input.trim() || !user) return;
 
-    const userMessage = { sender: "user", text: input };
+    const userMessage: Message = { sender: "user", text: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
@@ -93,12 +93,12 @@ export default function ChatbotScreen() {
         response.text?.trim() ||
         "Desculpe, não consegui gerar uma resposta agora.";
 
-      setMessages((prev) => [...prev, { sender: "bot", text }]);
+      setMessages((prev) => [...prev, { sender: "bot", text } as Message]);
     } catch (error) {
       console.error(error);
       setMessages((prev) => [
         ...prev,
-        { sender: "bot", text: "⚠️ Ocorreu um erro ao processar sua mensagem." },
+        { sender: "bot", text: "⚠️ Ocorreu um erro ao processar sua mensagem." } as Message,
       ]);
     } finally {
       setLoading(false);
