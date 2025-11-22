@@ -14,7 +14,11 @@ jest.mock("expo-router", () => ({
 }));
 
 jest.mock("@/auth/AuthContext", () => ({
-  useAuth: () => ({ user: { displayName: "Teste", email: "test@example.com" }, loading: false }),
+  useAuth: () => ({
+    user: { displayName: "Teste", email: "test@example.com" },
+    profile: { nome: "Teste", email: "test@example.com", cpf: null, telefone: null },
+    loading: false,
+  }),
 }));
 
 jest.mock("@/services/auth", () => ({

@@ -1,6 +1,19 @@
 import '@testing-library/jest-native/extend-expect';
 import 'react-native-gesture-handler/jestSetup';
 
+// Mock AsyncStorage
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {
+    getItem: jest.fn().mockResolvedValue(null),
+    setItem: jest.fn().mockResolvedValue(undefined),
+    removeItem: jest.fn().mockResolvedValue(undefined),
+    multiGet: jest.fn().mockResolvedValue([]),
+    multiSet: jest.fn().mockResolvedValue(undefined),
+    getAllKeys: jest.fn().mockResolvedValue([]),
+  },
+}));
+
 // Mock Reanimated (v3 compatible)
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 jest.mock('react-native-reanimated', () => require('react-native-reanimated/mock'));
