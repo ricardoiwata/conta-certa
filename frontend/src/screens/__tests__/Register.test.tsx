@@ -1,5 +1,6 @@
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
+import { renderWithProviders } from "@/test-utils/render";
 
 import RegisterScreen from "../Register";
 
@@ -28,7 +29,7 @@ describe("RegisterScreen", () => {
       message: "Firebase: Error (auth/email-already-in-use).",
     });
 
-    const { getByTestId, findAllByText } = render(<RegisterScreen />);
+    const { getByTestId, findAllByText } = renderWithProviders(<RegisterScreen />);
 
     fireEvent.changeText(getByTestId("register-name"), "Nome Usuário");
     fireEvent.changeText(getByTestId("register-email"), "user@example.com");
@@ -43,7 +44,7 @@ describe("RegisterScreen", () => {
   it("cadastro bem-sucedido navega para /", async () => {
     mockSignUpEmail.mockResolvedValueOnce({ uid: "x" });
 
-    const { getByTestId } = render(<RegisterScreen />);
+    const { getByTestId } = renderWithProviders(<RegisterScreen />);
 
     fireEvent.changeText(getByTestId("register-name"), "Nome Usuário");
     fireEvent.changeText(getByTestId("register-email"), "user@example.com");
@@ -51,13 +52,16 @@ describe("RegisterScreen", () => {
     fireEvent.changeText(getByTestId("register-confirm"), "123456");
     fireEvent.press(getByTestId("register-submit"));
 
-    await waitFor(() => {
-      expect(mockSignUpEmail).toHaveBeenCalledWith(
-        "user@example.com",
-        "123456",
-        "Nome Usuário"
-      );
-      expect(mockReplace).toHaveBeenCalledWith("/");
-    });
+    await waitFor(
+      () => {
+        expect(mockSignUpEmail).toHaveBeenCalledWith(
+          "user@example.com",
+          "123456",
+          "Nome Usuário"
+        );
+        expect(mockReplace).toHaveBeenCalledWith("/");
+      },
+      { timeout: 3000 }
+    );
   });
 });

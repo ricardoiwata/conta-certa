@@ -221,13 +221,21 @@ export class DashboardService {
   }
 
   private async fetchUserEntries(firebaseUid: string) {
+    // Buscar últimos 24 meses para o gráfico
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
     const receitas = await this.receitaRepository.find({
       where: { usuarioUid: firebaseUid },
+      order: { data: 'DESC' },
+      take: 1000, // Limite para evitar queries muito pesadas
     });
 
     const despesas = await this.despesaRepository.find({
       where: { usuarioUid: firebaseUid },
       relations: ['categoria'],
+      order: { data: 'DESC' },
+      take: 1000, // Limite para evitar queries muito pesadas
     });
 
     return { receitas, despesas };

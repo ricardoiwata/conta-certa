@@ -52,7 +52,36 @@ export interface DashboardData {
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
-  return api.get<DashboardData>("/dashboard/summary", true);
+  try {
+    return await Promise.race([
+      api.get<DashboardData>("/dashboard/summary", true),
+      new Promise<DashboardData>((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout ao carregar dashboard")), 8000)
+      ),
+    ]);
+  } catch (error) {
+    console.error("Erro ao carregar dashboard:", error);
+    // Retornar dados padrão em caso de timeout ou erro
+    return {
+      balance: 0,
+      labels: [],
+      receita: [],
+      despesa: [],
+      totalReceitasRecebidas: 0,
+      totalDespesasPagas: 0,
+      receitasPendentes: 0,
+      despesasPendentes: 0,
+      proximos7Dias: [],
+      alertas: [],
+      categorias: [],
+      notificacoes: [],
+      dica: "Mantenha o controle de suas despesas.",
+      incomeVsExpenseDetail: {
+        defaultPeriod: "6m",
+        periods: [],
+      },
+    };
+  }
 }
 
 export async function getIncomeVsExpenseDetail(): Promise<IncomeVsExpenseDetail> {

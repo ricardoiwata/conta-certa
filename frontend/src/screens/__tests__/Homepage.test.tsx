@@ -56,7 +56,7 @@ jest.mock("@/services/receitas", () => ({
 }));
 
 jest.mock("@/context/FabContext", () => ({
-  useFab: () => ({ setIsOpen: jest.fn(), setFabVisible: jest.fn() }),
+  useFab: () => ({ setIsOpen: jest.fn(), setFabVisible: jest.fn(), setFabCrudVisible: jest.fn() }),
 }));
 
 jest.mock("@/theme/ThemeContext", () => ({

@@ -5,6 +5,7 @@ import { KeyboardAvoidingView, Platform, View } from "react-native";
 import {
   Button,
   HelperText,
+  Snackbar,
   Text,
   TextInput,
   useTheme,
@@ -21,6 +22,7 @@ export default function RegisterScreen() {
   const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const theme = useTheme();
 
   const emailInvalid = !!email && !/^\S+@\S+\.\S+$/.test(email);
@@ -34,10 +36,14 @@ export default function RegisterScreen() {
 
   async function handleRegister() {
     setError(null);
+    setSuccessMessage(null);
     try {
       setSubmitting(true);
       await signUpEmail(email.trim(), password, name.trim());
-      router.replace("/");
+      setSuccessMessage("Cadastro realizado com sucesso! Redirecionando...");
+      setTimeout(() => {
+        router.replace("/");
+      }, 2000);
     } catch (e: any) {
       const code = e?.code as string | undefined;
       const message = e?.message as string | undefined;
@@ -49,7 +55,6 @@ export default function RegisterScreen() {
       } else {
         setError(message ?? "Não foi possível cadastrar.");
       }
-    } finally {
       setSubmitting(false);
     }
   }
@@ -190,6 +195,13 @@ export default function RegisterScreen() {
           </Button>
         </View>
       </View>
+      <Snackbar
+        visible={!!successMessage}
+        onDismiss={() => setSuccessMessage(null)}
+        duration={3000}
+      >
+        {successMessage}
+      </Snackbar>
     </KeyboardAvoidingView>
   );
 }

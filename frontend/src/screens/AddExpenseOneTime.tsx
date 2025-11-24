@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/auth/AuthContext";
 import { createDespesa } from "@/services/despesas";
 import DatePickerModal from "@/components/DatePickerModal";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 function todayBR() {
   const dt = new Date();
@@ -57,6 +58,7 @@ export default function AddExpenseOneTime() {
       const v = parseMaskedBRToNumber(valorMasked);
       if (!Number.isFinite(v) || v <= 0) throw new Error("Informe um valor válido (> 0)");
       const idUsuario = user?.uid || "";
+      
       await createDespesa({
         descricao,
         valor: v,
@@ -68,10 +70,14 @@ export default function AddExpenseOneTime() {
         usuarioUid: idUsuario,
         categoriaId: categoriaId || 1,
       });
-      setSnack("Despesa cadastrada (não recorrente)!");
-      setTimeout(() => router.back(), 600);
+      
+      setSnack("✓ Despesa cadastrada com sucesso!");
+      setTimeout(() => {
+        router.back();
+      }, 1500);
     } catch (e: any) {
-      setError(e?.message || "Erro ao salvar");
+      console.error("Erro ao salvar despesa:", e);
+      setError(e?.message || "Erro ao salvar a despesa");
     }
   }
 
@@ -125,8 +131,18 @@ export default function AddExpenseOneTime() {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      <Snackbar visible={!!snack} onDismiss={() => setSnack(null)} duration={2000}>
-        {snack}
+      <Snackbar 
+        visible={!!snack} 
+        onDismiss={() => setSnack(null)} 
+        duration={2000}
+        style={{ backgroundColor: "#2e7d32" }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <MaterialCommunityIcons name="check-circle" size={20} color="white" />
+          <Text style={{ color: "white", fontWeight: "bold", fontSize: 14 }}>
+            Despesa cadastrada com sucesso!
+          </Text>
+        </View>
       </Snackbar>
 
       <DatePickerModal visible={dpOpen} onDismiss={() => setDpOpen(false)} onConfirm={(iso) => setData(iso)} title="Selecionar data" initialDate={data} />

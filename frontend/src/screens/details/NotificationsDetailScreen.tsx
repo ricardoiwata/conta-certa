@@ -9,15 +9,29 @@ export default function NotificationsDetailScreen() {
   const theme = useTheme();
   const [notificacoes, setNotificacoes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        const data = await getDashboardData();
+        setError(null);
+        
+        // Adicionar timeout de 5 segundos
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout ao carregar notificações')), 5000)
+        );
+        
+        const data = await Promise.race([
+          getDashboardData(),
+          timeoutPromise
+        ]) as any;
+        
         setNotificacoes(data.notificacoes || []);
       } catch (e) {
         console.error("Erro ao carregar notificações:", e);
+        setError((e as Error)?.message || "Não foi possível carregar as notificações");
+        setNotificacoes([]);
       } finally {
         setLoading(false);
       }
@@ -41,7 +55,17 @@ export default function NotificationsDetailScreen() {
             )}
           </View>
           
-          {notificacoes.length > 0 ? (
+          {error ? (
+            <Text style={{ 
+              opacity: 0.6, 
+              textAlign: 'center', 
+              paddingVertical: 32,
+              fontSize: 16,
+              color: theme.colors.error
+            }}>
+              {error}
+            </Text>
+          ) : notificacoes.length > 0 ? (
             notificacoes.map((notificacao) => (
               <List.Item 
                 key={notificacao.id} 

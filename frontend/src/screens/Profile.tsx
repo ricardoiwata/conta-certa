@@ -17,7 +17,7 @@ export default function Profile() {
   const { user, profile } = useAuth();
   const router = useRouter();
   const { themePreference, setThemePreference } = useThemePreference();
-  const { setFabVisible } = useFab();
+  const { setFabVisible, setFabCrudVisible } = useFab();
   const [menuVisible, setMenuVisible] = useState(false);
   const [notificacoes, setNotificacoes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,10 +36,12 @@ export default function Profile() {
 
   useEffect(() => {
     setFabVisible(false);
+    setFabCrudVisible(false);
     return () => {
       setFabVisible(true);
+      setFabCrudVisible(true);
     };
-  }, [setFabVisible]);
+  }, [setFabVisible, setFabCrudVisible]);
 
   useEffect(() => {
     (async () => {
@@ -164,6 +166,16 @@ export default function Profile() {
 
       const totalDespesas = despesasMap.reduce((sum: number, d: any) => sum + (d.valor || 0), 0);
       const totalReceitas = receitasMap.reduce((sum: number, r: any) => sum + (r.valor || 0), 0);
+
+      // Verificar se há dados
+      if ((despesasMap?.length ?? 0) === 0 && (receitasMap?.length ?? 0) === 0) {
+        Alert.alert(
+          "Sem dados",
+          "Não há receitas ou despesas cadastradas no período selecionado para gerar o relatório."
+        );
+        setGeneratingReport(false);
+        return;
+      }
 
       await generateCompleteReport(
         despesasMap,

@@ -227,56 +227,64 @@ export default function IncomeVsExpenseDetailScreen() {
 
               {activePeriod ? (
                 <>
-                  <View style={{ width: "100%", marginTop: 4 }} onLayout={handleChartLayout}>
-                    <LineChart
-                      data={{
-                        labels: chartLabels,
-                        datasets: [
-                          {
-                            data: [...activePeriod.receita],
-                            color: () => theme.colors.primary,
-                            strokeWidth: 3,
+                  {activePeriod.receita.length > 0 && activePeriod.despesa.length > 0 ? (
+                    <View style={{ width: "100%", marginTop: 4 }} onLayout={handleChartLayout}>
+                      <LineChart
+                        data={{
+                          labels: chartLabels,
+                          datasets: [
+                            {
+                              data: [...activePeriod.receita],
+                              color: () => theme.colors.primary,
+                              strokeWidth: 3,
+                            },
+                            {
+                              data: [...activePeriod.despesa],
+                              color: () => theme.colors.error,
+                              strokeWidth: 3,
+                            },
+                          ],
+                          legend: ["Receita", "Despesa"],
+                        }}
+                        width={chartWidth}
+                        height={220}
+                        yAxisLabel="R$ "
+                        chartConfig={{
+                          backgroundColor: theme.colors.surface,
+                          backgroundGradientFrom: theme.colors.surface,
+                          backgroundGradientTo: theme.colors.surface,
+                          decimalPlaces: 0,
+                          color: () => theme.colors.onSurface,
+                          labelColor: () => theme.colors.onSurface,
+                          propsForLabels: {
+                            fontSize: 12,
+                            fontWeight: "600",
+                            fontFamily: "System",
+                            fill: theme.colors.onSurface,
                           },
-                          {
-                            data: [...activePeriod.despesa],
-                            color: () => theme.colors.error,
-                            strokeWidth: 3,
+                          propsForDots: { r: "4", strokeWidth: "2" },
+                          propsForBackgroundLines: {
+                            stroke: theme.colors.outline + "40",
+                            strokeDasharray: "2 4",
                           },
-                        ],
-                        legend: ["Receita", "Despesa"],
-                      }}
-                      width={chartWidth}
-                      height={220}
-                      yAxisLabel="R$ "
-                      chartConfig={{
-                        backgroundColor: theme.colors.surface,
-                        backgroundGradientFrom: theme.colors.surface,
-                        backgroundGradientTo: theme.colors.surface,
-                        decimalPlaces: 0,
-                        color: () => theme.colors.onSurface,
-                        labelColor: () => theme.colors.onSurface,
-                        propsForLabels: {
-                          fontSize: 12,
-                          fontWeight: "600",
-                          fontFamily: "System",
-                          fill: theme.colors.onSurface,
-                        },
-                        propsForDots: { r: "4", strokeWidth: "2" },
-                        propsForBackgroundLines: {
-                          stroke: theme.colors.outline + "40",
-                          strokeDasharray: "2 4",
-                        },
-                        useShadowColorFromDataset: false,
-                      }}
-                      bezier
-                      withShadow={false}
-                      withVerticalLines={false}
-                      withHorizontalLines
-                      withInnerLines={false}
-                      withOuterLines={false}
-                      style={{ borderRadius: 8, marginVertical: 8 }}
-                    />
-                  </View>
+                          useShadowColorFromDataset: false,
+                        }}
+                        bezier
+                        withShadow={false}
+                        withVerticalLines={false}
+                        withHorizontalLines
+                        withInnerLines={false}
+                        withOuterLines={false}
+                        style={{ borderRadius: 8, marginVertical: 8 }}
+                      />
+                    </View>
+                  ) : (
+                    <View style={{ paddingVertical: 16, alignItems: "center" }}>
+                      <Text style={{ opacity: 0.6 }}>
+                        Sem dados para exibir o gráfico
+                      </Text>
+                    </View>
+                  )}
 
                   <View style={{ gap: 12 }}>
                     <Text variant="titleSmall" style={{ opacity: 0.7 }}>

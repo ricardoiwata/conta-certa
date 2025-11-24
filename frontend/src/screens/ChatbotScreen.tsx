@@ -12,6 +12,7 @@ import {
   Text,
   useTheme,
   ActivityIndicator,
+  IconButton,
 } from "react-native-paper";
 import { Stack, useRouter } from "expo-router";
 import { useAuth } from "../auth/AuthContext";
@@ -38,7 +39,7 @@ export default function ChatbotScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const theme = useTheme();
-  const { setFabVisible } = useFab();
+  const { setFabVisible, setFabCrudVisible } = useFab();
 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -50,8 +51,12 @@ export default function ChatbotScreen() {
 
   useEffect(() => {
     setFabVisible(false);
-    return () => setFabVisible(true);
-  }, [setFabVisible]);
+    setFabCrudVisible(false);
+    return () => {
+      setFabVisible(true);
+      setFabCrudVisible(true);
+    };
+  }, [setFabVisible, setFabCrudVisible]);
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
@@ -77,8 +82,9 @@ export default function ChatbotScreen() {
       `;
 
       const prompt = `
-        Você é um assistente financeiro. Responda de forma simples e direta.
-        Use o contexto abaixo para ajudar o usuário com suas finanças.
+        Você é um assistente financeiro do conta certa, um aplicativo de gerenciamento financeiro. Responda de forma simples e direta.
+        Use o contexto abaixo para ajudar o usuário com suas finanças. Não mande o contexto inteiro, apenas utilize as informações relevantes para responder à pergunta do usuário.
+        não coloque ** nos textos pois para renderizar no app isso pode causar problemas.r
         ${context}
         ---
         Pergunta: ${userMessage.text}
@@ -174,14 +180,17 @@ export default function ChatbotScreen() {
             mode="outlined"
           />
 
-          <Button
+          <IconButton
+            icon="send"
+            size={24}
             onPress={handleSend}
-            loading={loading}
-            disabled={loading}
-            mode="contained"
-          >
-            Enviar
-          </Button>
+            disabled={loading || !input.trim()}
+            iconColor={theme.colors.primary}
+            style={{
+              margin: 0,
+              marginTop: 6,
+            }}
+          />
         </View>
       </View>
     </KeyboardAvoidingView>

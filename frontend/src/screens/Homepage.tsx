@@ -37,14 +37,15 @@ export default function Homepage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { setFabVisible } = useFab();
+  const { setFabVisible, setFabCrudVisible } = useFab();
 
   useEffect(() => {
     setFabVisible(true);
+    setFabCrudVisible(true);
     if (!loading && !user) {
       router.replace("/login");
     }
-  }, [loading, user, router, setFabVisible]);
+  }, [loading, user, router, setFabVisible, setFabCrudVisible]);
 
 
   const greeting = useMemo(() => {
@@ -56,7 +57,7 @@ export default function Homepage() {
 
   const theme = useTheme();
   const [fabOpen, setFabOpen] = useState(false);
-  const { fabVisible } = useFab();
+  const { fabVisible, fabCrudVisible } = useFab();
   const [chooseType, setChooseType] = useState<null | "income" | "expense">(
     null
   );
@@ -282,7 +283,7 @@ export default function Homepage() {
           style={modernStyles.balanceCard}
         >
           <LinearGradient
-            colors={balance >= 0 ? ['#4CAF50', '#45a049', '#2E7D32'] : ['#f44336', '#e53935', '#c62828']}
+            colors={balance > 0 ? ['#4CAF50', '#45a049', '#2E7D32'] : balance < 0 ? ['#f44336', '#e53935', '#c62828'] : ['#9E9E9E', '#757575', '#616161']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={modernStyles.balanceGradient}
@@ -309,12 +310,12 @@ export default function Homepage() {
               
               <View style={modernStyles.balanceIndicator}>
                 <Icon
-                  source={balance >= 0 ? "trending-up" : "trending-down"}
+                  source={balance > 0 ? "trending-up" : balance < 0 ? "trending-down" : "minus"}
                   size={16}
                   color="white"
                 />
                 <Text style={modernStyles.balanceIndicatorText}>
-                  {balance >= 0 ? "Saldo Positivo" : "Saldo Negativo"}
+                  {balance > 0 ? "Saldo Positivo" : balance < 0 ? "Saldo Negativo" : "Saldo Neutro"}
                 </Text>
               </View>
             </View>
@@ -402,57 +403,65 @@ export default function Homepage() {
             >
               Receita x Despesa
             </Text>
-            <View style={{ width: "100%", marginTop: 4 }} onLayout={handleIncomeChartLayout}>
-              <LineChart
-                data={{
-                  labels: [...labels],
-                  datasets: [
-                    {
-                      data: [...receita],
-                      color: () => theme.colors.primary,
-                      strokeWidth: 3,
+            {labels.length > 0 && receita.length > 0 && despesa.length > 0 ? (
+              <View style={{ width: "100%", marginTop: 4 }} onLayout={handleIncomeChartLayout}>
+                <LineChart
+                  data={{
+                    labels: [...labels],
+                    datasets: [
+                      {
+                        data: [...receita],
+                        color: () => theme.colors.primary,
+                        strokeWidth: 3,
+                      },
+                      {
+                        data: [...despesa],
+                        color: () => theme.colors.error,
+                        strokeWidth: 3,
+                      },
+                    ],
+                    legend: ["Receita", "Despesa"],
+                  }}
+                  width={incomeChartWidth}
+                  height={180}
+                  yAxisLabel="R$ "
+                  yAxisSuffix=""
+                  chartConfig={{
+                    backgroundColor: theme.colors.surface,
+                    backgroundGradientFrom: theme.colors.surface,
+                    backgroundGradientTo: theme.colors.surface,
+                    decimalPlaces: 0,
+                    color: () => theme.colors.onSurface,
+                    labelColor: () => theme.colors.onSurface,
+                    propsForLabels: {
+                      fontSize: 12,
+                      fontWeight: '600',
+                      fontFamily: 'System',
+                      fill: theme.colors.onSurface
                     },
-                    {
-                      data: [...despesa],
-                      color: () => theme.colors.error,
-                      strokeWidth: 3,
+                    propsForDots: { r: "3", strokeWidth: "1.5" },
+                    propsForBackgroundLines: {
+                      stroke: theme.colors.outline + '40',
+                      strokeDasharray: "2 4",
                     },
-                  ],
-                  legend: ["Receita", "Despesa"],
-                }}
-                width={incomeChartWidth}
-                height={180}
-                yAxisLabel="R$ "
-                yAxisSuffix=""
-                chartConfig={{
-                  backgroundColor: theme.colors.surface,
-                  backgroundGradientFrom: theme.colors.surface,
-                  backgroundGradientTo: theme.colors.surface,
-                  decimalPlaces: 0,
-                  color: () => theme.colors.onSurface,
-                  labelColor: () => theme.colors.onSurface,
-                  propsForLabels: {
-                    fontSize: 12,
-                    fontWeight: '600',
-                    fontFamily: 'System',
-                    fill: theme.colors.onSurface
-                  },
-                  propsForDots: { r: "3", strokeWidth: "1.5" },
-                  propsForBackgroundLines: {
-                    stroke: theme.colors.outline + '40',
-                    strokeDasharray: "2 4",
-                  },
-                  useShadowColorFromDataset: false,
-                }}
-                bezier
-                withShadow={false}
-                withVerticalLines={false}
-                withHorizontalLines={true}
-                withInnerLines={false}
-                withOuterLines={false}
-                style={{ marginVertical: 8, borderRadius: 8 }}
-              />
-            </View>
+                    useShadowColorFromDataset: false,
+                  }}
+                  bezier
+                  withShadow={false}
+                  withVerticalLines={false}
+                  withHorizontalLines={true}
+                  withInnerLines={false}
+                  withOuterLines={false}
+                  style={{ marginVertical: 8, borderRadius: 8 }}
+                />
+              </View>
+            ) : (
+              <View style={{ paddingVertical: 16, alignItems: 'center' }}>
+                <Text style={{ opacity: 0.6 }}>
+                  Sem dados para exibir o gráfico
+                </Text>
+              </View>
+            )}
           </Card.Content>
         </Card>
 
@@ -638,50 +647,53 @@ export default function Homepage() {
               bottom: Math.max(insets.bottom + 16, 16),
               left: 16,
             }}
+            testID="chatbot-fab"
           />
-          <FAB.Group
-            open={fabOpen}
-            visible
-            icon={fabOpen ? "close" : "plus"}
-            actions={[
-              {
-                icon: "cash-plus",
-                label: "Receita",
-                onPress: () => {
-                  setFabOpen(false);
-                  setChooseType("income");
+          {fabCrudVisible && (
+            <FAB.Group
+              open={fabOpen}
+              visible
+              icon={fabOpen ? "close" : "plus"}
+              actions={[
+                {
+                  icon: "cash-plus",
+                  label: "Receita",
+                  onPress: () => {
+                    setFabOpen(false);
+                    setChooseType("income");
+                  },
+                  color: theme.colors.primary,
+                  labelStyle: {
+                    color: "#FFFFFF",
+                    fontWeight: "700",
+                    fontSize: 16,
+                  },
                 },
-                color: theme.colors.primary,
-                labelStyle: {
-                  color: "#FFFFFF",
-                  fontWeight: "700",
-                  fontSize: 16,
+                {
+                  icon: "cash-minus",
+                  label: "Despesa",
+                  onPress: () => {
+                    setFabOpen(false);
+                    setChooseType("expense");
+                  },
+                  color: theme.colors.primary,
+                  labelStyle: {
+                    color: "#FFFFFF",
+                    fontWeight: "700",
+                    fontSize: 16,
+                  },
                 },
-              },
-              {
-                icon: "cash-minus",
-                label: "Despesa",
-                onPress: () => {
-                  setFabOpen(false);
-                  setChooseType("expense");
-                },
-                color: theme.colors.primary,
-                labelStyle: {
-                  color: "#FFFFFF",
-                  fontWeight: "700",
-                  fontSize: 16,
-                },
-              },
-            ]}
-            color={theme.colors.primary}
-            onStateChange={({ open }) => setFabOpen(open)}
-            backdropColor="transparent"
-            style={{
-              position: "absolute",
-              bottom: Math.max(insets.bottom - 4, 0),
-              right: 16,
-            }}
-          />
+              ]}
+              color={theme.colors.primary}
+              onStateChange={({ open }) => setFabOpen(open)}
+              backdropColor="transparent"
+              style={{
+                position: "absolute",
+                bottom: Math.max(insets.bottom - 32, 0),
+                right: 16,
+              }}
+            />
+          )}
         </Portal>
       )}
       <Portal>

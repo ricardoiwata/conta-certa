@@ -17,7 +17,7 @@ export async function createReceita(input: CreateReceitaInput) {
     ...input,
     recorrentePaiId: input.recorrentePaiId ?? 0,
   };
-  return api.post<any>("/receita", body);
+  return api.post<any>("/receita", body, true);
 }
 
 export async function listReceitas() {
@@ -48,14 +48,14 @@ export type UpdateReceitaInput = Partial<{
 }>;
 
 export async function updateReceita(id: number, input: UpdateReceitaInput) {
-  return api.patch<any>(`/receita/${id}`, input);
+  return api.patch<any>(`/receita/${id}`, input, true);
 }
 
 export async function marcarReceitaRealizada(id: number, realizada = true) {
-  return api.patch<any>(`/receita/${id}`, { realizada });
+  return api.patch<any>(`/receita/${id}`, { realizada }, true);
 }
 
 export async function deleteReceita(id: number) {
-  return api.delete<any>(`/receita/${id}`);
+  return api.delete<any>(`/receita/${id}`, true);
 }
 

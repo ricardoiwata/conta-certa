@@ -17,7 +17,7 @@ export async function createDespesa(input: CreateDespesaInput) {
     ...input,
     recorrentePaiId: input.recorrentePaiId ?? 0,
   };
-  return api.post<any>("/despesa", body);
+  return api.post<any>("/despesa", body, true);
 }
 
 export async function listDespesas() {
@@ -48,13 +48,13 @@ export type UpdateDespesaInput = Partial<{
 }>;
 
 export async function updateDespesa(id: number, input: UpdateDespesaInput) {
-  return api.patch<any>(`/despesa/${id}`, input);
+  return api.patch<any>(`/despesa/${id}`, input, true);
 }
 
 export async function marcarDespesaRealizada(id: number, realizada = true) {
-  return api.patch<any>(`/despesa/${id}`, { realizada });
+  return api.patch<any>(`/despesa/${id}`, { realizada }, true);
 }
 
 export async function deleteDespesa(id: number) {
-  return api.delete<any>(`/despesa/${id}`);
+  return api.delete<any>(`/despesa/${id}`, true);
 }

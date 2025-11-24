@@ -51,23 +51,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (u) => {
+    const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
-
-      if (u) {
-        // Usuário autenticado, carregar perfil
-        try {
-          await refreshProfile();
-        } catch (error) {
-          console.error("Erro ao carregar perfil na autenticação:", error);
-          // Perfil pode não existir ainda, não é erro crítico
-        }
-      } else {
-        // Usuário desautenticado
-        setProfile(null);
-        setProfileError(null);
-      }
-
+      // Não carrega o perfil automaticamente aqui
+      // O perfil será carregado sob demanda quando necessário
       setLoading(false);
     });
     return () => unsub();
