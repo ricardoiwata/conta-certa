@@ -3,11 +3,15 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { DashboardService } from './dashboard.service';
 import { Receita } from 'src/modules/receita/domain/entities/receita.entity';
 import { Despesa } from 'src/modules/despesa/domain/entities/despesa.entity';
+import { Notificacao } from 'src/modules/notificacao/domain/entities/notificacao.entity';
+import { Usuario } from 'src/modules/usuario/domain/entities/usuario.entity';
 
 describe('DashboardService', () => {
   let service: DashboardService;
   let mockReceitaRepository: any;
   let mockDespesaRepository: any;
+  let mockNotificacaoRepository: any;
+  let mockUsuarioRepository: any;
 
   beforeEach(async () => {
     mockReceitaRepository = {
@@ -16,6 +20,14 @@ describe('DashboardService', () => {
 
     mockDespesaRepository = {
       find: jest.fn().mockResolvedValue([]),
+    };
+
+    mockNotificacaoRepository = {
+      find: jest.fn().mockResolvedValue([]),
+    };
+
+    mockUsuarioRepository = {
+      findOne: jest.fn().mockResolvedValue({ id: 1 }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -28,6 +40,14 @@ describe('DashboardService', () => {
         {
           provide: getRepositoryToken(Despesa),
           useValue: mockDespesaRepository,
+        },
+        {
+          provide: getRepositoryToken(Notificacao),
+          useValue: mockNotificacaoRepository,
+        },
+        {
+          provide: getRepositoryToken(Usuario),
+          useValue: mockUsuarioRepository,
         },
       ],
     }).compile();

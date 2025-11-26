@@ -17,6 +17,7 @@ import {
   TextInput,
   useTheme,
 } from "react-native-paper";
+import { maskCEP, maskCPF, maskPhone } from "@/utils/masks";
 
 export default function EditProfileScreen() {
   const { profile, refreshProfile } = useAuth();
@@ -35,12 +36,12 @@ export default function EditProfileScreen() {
   useEffect(() => {
     if (profile) {
       setNome(profile.nome || "");
-      setCpf(profile.cpf || "");
-      setTelefone(profile.telefone || "");
+      setCpf(maskCPF(profile.cpf || ""));
+      setTelefone(maskPhone(profile.telefone || ""));
       setEndereco(profile.endereco || "");
       setCidade(profile.cidade || "");
       setEstado(profile.estado || "");
-      setCep(profile.cep || "");
+      setCep(maskCEP(profile.cep || ""));
     }
   }, [profile]);
 
@@ -52,14 +53,19 @@ export default function EditProfileScreen() {
 
     setLoading(true);
     try {
+      // Remove formatting before sending
+      const cleanCpf = cpf.replace(/\D/g, "");
+      const cleanTelefone = telefone.replace(/\D/g, "");
+      const cleanCep = cep.replace(/\D/g, "");
+
       await updateMyProfile({
         nome,
-        cpf: cpf || undefined,
-        telefone: telefone || undefined,
+        cpf: cleanCpf || undefined,
+        telefone: cleanTelefone || undefined,
         endereco: endereco || undefined,
         cidade: cidade || undefined,
         estado: estado || undefined,
-        cep: cep || undefined,
+        cep: cleanCep || undefined,
       });
 
       await refreshProfile();
@@ -163,12 +169,13 @@ export default function EditProfileScreen() {
             <TextInput
               label="CPF"
               value={cpf}
-              onChangeText={setCpf}
+              onChangeText={(text) => setCpf(maskCPF(text))}
               disabled={loading}
               keyboardType="numeric"
               mode="outlined"
               placeholder="XXX.XXX.XXX-XX"
               style={{ marginBottom: 16 }}
+              maxLength={14}
             />
 
             <Text
@@ -184,12 +191,13 @@ export default function EditProfileScreen() {
             <TextInput
               label="Telefone"
               value={telefone}
-              onChangeText={setTelefone}
+              onChangeText={(text) => setTelefone(maskPhone(text))}
               disabled={loading}
-              keyboardType="phone-pad"
+              keyboardType="numeric"
               mode="outlined"
               placeholder="(11) 99999-9999"
               style={{ marginBottom: 16 }}
+              maxLength={15}
             />
           </Card.Content>
         </Card>
@@ -288,11 +296,12 @@ export default function EditProfileScreen() {
                 <TextInput
                   label="CEP"
                   value={cep}
-                  onChangeText={setCep}
+                  onChangeText={(text) => setCep(maskCEP(text))}
                   disabled={loading}
                   keyboardType="numeric"
                   mode="outlined"
                   placeholder="01234-567"
+                  maxLength={9}
                 />
               </View>
             </View>

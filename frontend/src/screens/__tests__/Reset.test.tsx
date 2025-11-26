@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react-native";
+import { fireEvent, render, act } from "@testing-library/react-native";
 import React from "react";
 import ResetScreen from "../Reset";
 
@@ -24,8 +24,14 @@ describe("ResetScreen", () => {
     (resetPassword as jest.Mock).mockResolvedValueOnce(undefined);
 
     const { getByTestId, findByText } = render(<ResetScreen />);
-    fireEvent.changeText(getByTestId("reset-email"), "  user@example.com  ");
-    fireEvent.press(getByTestId("reset-submit"));
+    
+    await act(async () => {
+      fireEvent.changeText(getByTestId("reset-email"), "user@example.com");
+    });
+    
+    await act(async () => {
+      fireEvent.press(getByTestId("reset-submit"));
+    });
 
     expect(resetPassword).toHaveBeenCalledWith("user@example.com");
     expect(

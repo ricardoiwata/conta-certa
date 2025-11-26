@@ -12,6 +12,7 @@ import { listDespesas } from "@/services/despesas";
 import { listReceitas } from "@/services/receitas";
 import DatePickerModal from "@/components/DatePickerModal";
 import { generateCompleteReport } from "@/services/reportPdf";
+import { maskCPF } from "@/utils/masks";
 
 export default function Profile() {
   const { user, profile } = useAuth();
@@ -30,7 +31,7 @@ export default function Profile() {
 
   const name = profile?.nome || user?.displayName || "Usuário";
   const email = profile?.email || user?.email || "";
-  const cpf = profile?.cpf;
+  const cpf = profile?.cpf ? maskCPF(profile.cpf) : undefined;
   const telefone = profile?.telefone;
   const theme = useTheme();
 

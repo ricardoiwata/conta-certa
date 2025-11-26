@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Receita } from 'src/modules/receita/domain/entities/receita.entity';
 import { Despesa } from 'src/modules/despesa/domain/entities/despesa.entity';
+import { Notificacao } from 'src/modules/notificacao/domain/entities/notificacao.entity';
+import { Usuario } from 'src/modules/usuario/domain/entities/usuario.entity';
 
 @Injectable()
 export class DashboardService {
@@ -11,6 +13,10 @@ export class DashboardService {
     private receitaRepository: Repository<Receita>,
     @InjectRepository(Despesa)
     private despesaRepository: Repository<Despesa>,
+    @InjectRepository(Notificacao)
+    private notificacaoRepository: Repository<Notificacao>,
+    @InjectRepository(Usuario)
+    private usuarioRepository: Repository<Usuario>,
   ) {}
 
   async getDashboardData(firebaseUid: string) {
@@ -76,13 +82,17 @@ export class DashboardService {
     in7Days.setDate(in7Days.getDate() + 7);
 
     const proximos7Dias = [
-      ...receitasDoMes
+      ...receitas
         .filter((r) => {
-          const date = this.parseDate(typeof r.data === 'string' ? r.data : String(r.data));
+          const date = this.parseDate(
+            typeof r.data === 'string' ? r.data : String(r.data),
+          );
           return date && date >= tomorrow && date <= in7Days && !r.realizada;
         })
         .map((r) => {
-          const date = this.parseDate(typeof r.data === 'string' ? r.data : String(r.data));
+          const date = this.parseDate(
+            typeof r.data === 'string' ? r.data : String(r.data),
+          );
           return {
             id: String(r.id),
             tipo: 'Receita',
@@ -91,13 +101,17 @@ export class DashboardService {
             valor: Number(r.valor || 0),
           };
         }),
-      ...despesasDoMes
+      ...despesas
         .filter((d) => {
-          const date = this.parseDate(typeof d.data === 'string' ? d.data : String(d.data));
+          const date = this.parseDate(
+            typeof d.data === 'string' ? d.data : String(d.data),
+          );
           return date && date >= tomorrow && date <= in7Days && !d.realizada;
         })
         .map((d) => {
-          const date = this.parseDate(typeof d.data === 'string' ? d.data : String(d.data));
+          const date = this.parseDate(
+            typeof d.data === 'string' ? d.data : String(d.data),
+          );
           return {
             id: String(d.id),
             tipo: 'Despesa',
@@ -125,7 +139,9 @@ export class DashboardService {
 
       const monthReceitas = receitas
         .filter((r) => {
-          const d = this.parseDate(typeof r.data === 'string' ? r.data : String(r.data));
+          const d = this.parseDate(
+            typeof r.data === 'string' ? r.data : String(r.data),
+          );
           return d && d.getMonth() === monthNum && d.getFullYear() === yearNum;
         })
         .filter((r) => r.realizada)
@@ -133,8 +149,12 @@ export class DashboardService {
 
       const monthDespesas = despesas
         .filter((d) => {
-          const dt = this.parseDate(typeof d.data === 'string' ? d.data : String(d.data));
-          return dt && dt.getMonth() === monthNum && dt.getFullYear() === yearNum;
+          const dt = this.parseDate(
+            typeof d.data === 'string' ? d.data : String(d.data),
+          );
+          return (
+            dt && dt.getMonth() === monthNum && dt.getFullYear() === yearNum
+          );
         })
         .filter((d) => d.realizada)
         .reduce((acc, d) => acc + Number(d.valor || 0), 0);
@@ -168,22 +188,19 @@ export class DashboardService {
     }
 
     // Categorias com maior gasto
-    const categoriaGastos = despesasDoMes.reduce(
-      (acc, d) => {
-        const found = acc.find((c) => c.categoriaId === d.categoriaId);
-        if (found) {
-          found.valor += Number(d.valor || 0);
-        } else {
-          acc.push({
-            categoriaId: d.categoriaId,
-            nome: d.categoria?.nomeCategoria || 'Outros',
-            valor: Number(d.valor || 0),
-          });
-        }
-        return acc;
-      },
-      [] as any[],
-    );
+    const categoriaGastos = despesasDoMes.reduce((acc, d) => {
+      const found = acc.find((c) => c.categoriaId === d.categoriaId);
+      if (found) {
+        found.valor += Number(d.valor || 0);
+      } else {
+        acc.push({
+          categoriaId: d.categoriaId,
+          nome: d.categoria?.nomeCategoria || 'Outros',
+          valor: Number(d.valor || 0),
+        });
+      }
+      return acc;
+    }, [] as any[]);
 
     const categorias = categoriaGastos
       .sort((a, b) => b.valor - a.valor)
@@ -195,6 +212,25 @@ export class DashboardService {
       despesas,
       now,
     );
+
+    // Buscar notificações do usuário
+    const usuario = await this.usuarioRepository.findOne({
+      where: { firebaseUid },
+    });
+    let notificacoesList: any[] = [];
+
+    if (usuario) {
+      const notificacoes = await this.notificacaoRepository.find({
+        where: { usuarioId: usuario.id, ativa: true },
+        order: { data: 'DESC' },
+        take: 5,
+      });
+
+      notificacoesList = notificacoes.map((n) => ({
+        id: String(n.id),
+        texto: n.descricao,
+      }));
+    }
 
     return {
       balance,
@@ -208,7 +244,7 @@ export class DashboardService {
       proximos7Dias,
       alertas,
       categorias,
-      notificacoes: [], // Implementar depois
+      notificacoes: notificacoesList,
       dica: 'Mantenha o controle de suas despesas para não ultrapassar o orçamento.',
       incomeVsExpenseDetail,
     };
@@ -252,7 +288,10 @@ export class DashboardService {
       { id: '12m', label: '12 meses', months: 12 },
     ];
 
-    const { receitaMap, despesaMap } = this.aggregateMonthlyValues(receitas, despesas);
+    const { receitaMap, despesaMap } = this.aggregateMonthlyValues(
+      receitas,
+      despesas,
+    );
 
     const periods = periodConfigs.map((config) => {
       const currentRange = this.collectRangeTotals(
@@ -270,15 +309,24 @@ export class DashboardService {
         config.months,
       );
 
-      const receitaTotal = currentRange.receitaTotals.reduce((acc, value) => acc + value, 0);
-      const despesaTotal = currentRange.despesaTotals.reduce((acc, value) => acc + value, 0);
+      const receitaTotal = currentRange.receitaTotals.reduce(
+        (acc, value) => acc + value,
+        0,
+      );
+      const despesaTotal = currentRange.despesaTotals.reduce(
+        (acc, value) => acc + value,
+        0,
+      );
 
       const highestExpenseIndex = currentRange.despesaTotals.reduce(
-        (maxIndex, value, index, array) => (array[maxIndex] >= value ? maxIndex : index),
+        (maxIndex, value, index, array) =>
+          array[maxIndex] >= value ? maxIndex : index,
         0,
       );
       const highestExpenseLabel =
-        currentRange.labels[highestExpenseIndex] || currentRange.labels[currentRange.labels.length - 1] || '';
+        currentRange.labels[highestExpenseIndex] ||
+        currentRange.labels[currentRange.labels.length - 1] ||
+        '';
 
       const insightParts: string[] = [];
       if (highestExpenseLabel) {
@@ -296,7 +344,8 @@ export class DashboardService {
         this.buildTrendSentence(
           'Receitas',
           currentRange.receitaTotals[0] ?? 0,
-          currentRange.receitaTotals[currentRange.receitaTotals.length - 1] ?? 0,
+          currentRange.receitaTotals[currentRange.receitaTotals.length - 1] ??
+            0,
         ),
       );
 
@@ -304,7 +353,8 @@ export class DashboardService {
         this.buildTrendSentence(
           'Despesas',
           currentRange.despesaTotals[0] ?? 0,
-          currentRange.despesaTotals[currentRange.despesaTotals.length - 1] ?? 0,
+          currentRange.despesaTotals[currentRange.despesaTotals.length - 1] ??
+            0,
         ),
       );
 
@@ -320,10 +370,17 @@ export class DashboardService {
         receita: currentRange.receitaTotals,
         despesa: currentRange.despesaTotals,
         insight:
-          insight || 'Acompanhe a evolução das suas receitas e despesas neste período.',
+          insight ||
+          'Acompanhe a evolução das suas receitas e despesas neste período.',
         previousTotals: {
-          receita: previousRange.receitaTotals.reduce((acc, value) => acc + value, 0),
-          despesa: previousRange.despesaTotals.reduce((acc, value) => acc + value, 0),
+          receita: previousRange.receitaTotals.reduce(
+            (acc, value) => acc + value,
+            0,
+          ),
+          despesa: previousRange.despesaTotals.reduce(
+            (acc, value) => acc + value,
+            0,
+          ),
         },
       };
     });
@@ -398,14 +455,19 @@ export class DashboardService {
     return label.charAt(0).toUpperCase() + label.slice(1);
   }
 
-  private buildTrendSentence(label: string, firstValue: number, lastValue: number) {
+  private buildTrendSentence(
+    label: string,
+    firstValue: number,
+    lastValue: number,
+  ) {
     const difference = lastValue - firstValue;
     if (Math.abs(difference) < 0.5) {
       return `${label} mantiveram-se estáveis ao longo do período.`;
     }
 
     const direction = difference > 0 ? 'aumentaram' : 'diminuíram';
-    const base = firstValue !== 0 ? Math.abs((difference / firstValue) * 100) : 0;
+    const base =
+      firstValue !== 0 ? Math.abs((difference / firstValue) * 100) : 0;
     const percentageText = base > 0 ? ` em ${base.toFixed(1)}%` : '';
     return `${label} ${direction}${percentageText} do início ao fim do período.`;
   }

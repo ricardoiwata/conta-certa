@@ -30,8 +30,10 @@ describe("Dashboard detail screens", () => {
     jest.clearAllMocks();
   });
 
-  it("renders balance detail screen", () => {
-    const { getByText } = renderWithProviders(<BalanceDetailScreen />);
-    expect(getByText).toBeDefined();
+  it("renders balance detail screen", async () => {
+    const { findByText } = renderWithProviders(<BalanceDetailScreen />);
+    // Wait for some text that appears after loading or initially
+    // BalanceDetailScreen renders "Saldo atual" initially
+    expect(await findByText("Detalhes do fluxo de caixa previsto para o mês.")).toBeTruthy();
   });
 });

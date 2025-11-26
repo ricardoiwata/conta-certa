@@ -2,8 +2,9 @@ import { modernStyles } from "@/styles/modern.styles";
 import DetailScaffold from "./DetailScaffold";
 import React, { useEffect, useState } from "react";
 import { Card, List, Text, useTheme, Badge } from "react-native-paper";
-import { View } from "react-native";
+import { View, Alert } from "react-native";
 import { getDashboardData } from "@/services/dashboard";
+import { deactivateNotification } from "@/services/notificacoes";
 
 export default function NotificationsDetailScreen() {
   const theme = useTheme();
@@ -12,31 +13,46 @@ export default function NotificationsDetailScreen() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Adicionar timeout de 5 segundos
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Timeout ao carregar notificações')), 5000)
-        );
-        
-        const data = await Promise.race([
-          getDashboardData(),
-          timeoutPromise
-        ]) as any;
-        
-        setNotificacoes(data.notificacoes || []);
-      } catch (e) {
-        console.error("Erro ao carregar notificações:", e);
-        setError((e as Error)?.message || "Não foi possível carregar as notificações");
-        setNotificacoes([]);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    loadNotifications();
   }, []);
+
+  const loadNotifications = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Adicionar timeout de 5 segundos
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout ao carregar notificações')), 5000)
+      );
+      
+      const data = await Promise.race([
+        getDashboardData(),
+        timeoutPromise
+      ]) as any;
+      
+      setNotificacoes(data.notificacoes || []);
+    } catch (e) {
+      console.error("Erro ao carregar notificações:", e);
+      setError((e as Error)?.message || "Não foi possível carregar as notificações");
+      setNotificacoes([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeactivate = async (id: string) => {
+    try {
+      // Optimistic update
+      setNotificacoes(prev => prev.filter(n => n.id !== id));
+      await deactivateNotification(id);
+    } catch (error) {
+      console.error("Erro ao desativar notificação:", error);
+      Alert.alert("Erro", "Não foi possível desativar a notificação.");
+      // Revert optimistic update if needed, or just reload
+      loadNotifications();
+    }
+  };
 
   return (
     <DetailScaffold title="Notificações" description="Gerencie os avisos recebidos recentemente.">
@@ -73,6 +89,7 @@ export default function NotificationsDetailScreen() {
                 titleStyle={{ fontSize: 14, fontWeight: '500' }}
                 left={(props) => <List.Icon {...props} icon="bell" color="#FF6B6B" />}
                 style={{ paddingHorizontal: 0, marginVertical: 4 }}
+                onPress={() => handleDeactivate(notificacao.id)}
               />
             ))
           ) : (

@@ -73,11 +73,9 @@ describe("Profile screen", () => {
   });
 
   it("shows user data and signs out on press", async () => {
-    const { getByText } = renderWithProviders(<Profile />);
+    const { getByText, findByText } = renderWithProviders(<Profile />);
 
-    await waitFor(() => {
-      expect(getByText("Teste")).toBeTruthy();
-    });
+    await findByText("Teste");
 
     const signOutButton = getByText("Sair da conta");
     fireEvent.press(signOutButton);
