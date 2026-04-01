@@ -1,108 +1,103 @@
 # 💰 Conta Certa
 
-> **O seu assistente financeiro inteligente e descomplicado.**
+> **Your smart and simple financial assistant.**
 
-O **Conta Certa** é uma aplicação completa para gestão financeira pessoal, desenvolvida com as tecnologias mais modernas do mercado. Com ele, você controla suas receitas, despesas, visualiza gráficos intuitivos e conta com a ajuda de uma Inteligência Artificial para tirar dúvidas e receber dicas financeiras.
+**Conta Certa** is a full-featured personal finance management application built with modern technologies. It allows users to track income and expenses, visualize data through intuitive charts, and get financial insights with the help of AI.
 
 ---
 
-## 🚀 Funcionalidades
+## 🌎 About the Project
 
-- **📊 Dashboard Interativo:** Visão geral do seu saldo, receitas e despesas com gráficos claros.
-- **💸 Gestão de Transações:** Adicione receitas e despesas (únicas ou recorrentes) de forma rápida.
-- **🤖 Chatbot com IA:** Tire dúvidas sobre finanças e receba dicas personalizadas powered by **Google Gemini**.
-- **📂 Categorização:** Organize seus gastos por categorias personalizáveis.
-- **🔔 Notificações:** Receba alertas sobre contas a pagar e dicas.
-- **📄 Relatórios:** Gere relatórios detalhados (PDF) para análise profunda.
-- **🔐 Autenticação Segura:** Login e cadastro integrados com Firebase.
-- **📱 Design Moderno:** Interface limpa e responsiva, construída com React Native Paper.
+This project was developed as part of my portfolio to demonstrate full-stack development skills, including scalable backend architecture, mobile development, and AI integration.
+
+---
+
+## 🚀 Features
+
+- 📊 Interactive Dashboard: Overview of balance, income, and expenses with clear visualizations.
+- 💸 Transaction Management: Easily add income and expenses (one-time or recurring).
+- 🤖 AI Chatbot: Ask financial questions and receive personalized tips powered by Google Gemini.
+- 📂 Categorization: Organize transactions with customizable categories.
+- 🔔 Notifications: Get reminders for upcoming bills and useful tips.
+- 📄 Reports: Generate detailed PDF reports for deeper analysis.
+- 🔐 Secure Authentication: Firebase-based login and registration.
+- 📱 Modern UI: Clean and responsive interface built with React Native Paper.
 
 ---
 
 ## 🛠️ Tech Stack
 
-O projeto é estruturado como um monorepo contendo Backend e Frontend:
+This project is structured as a monorepo with Backend and Frontend:
 
-### **Backend** (API)
-- **Framework:** [NestJS](https://nestjs.com/) 🦁
-- **Linguagem:** TypeScript
-- **Banco de Dados:** SQLite / MySQL (via TypeORM)
-- **Autenticação:** Firebase Admin SDK
-- **Testes:** Jest
+### Backend (API)
+- Framework: NestJS
+- Language: TypeScript
+- Database: SQLite / MySQL (via TypeORM)
+- Authentication: Firebase Admin SDK
+- Testing: Jest
 
-### **Frontend** (Mobile)
-- **Framework:** [Expo](https://expo.dev/) (React Native) 📱
-- **Roteamento:** Expo Router
-- **UI Kit:** React Native Paper
-- **Gráficos:** React Native Chart Kit
-- **IA:** Google Generative AI SDK
-- **Testes:** Jest & Testing Library
+### Frontend (Mobile)
+- Framework: Expo (React Native)
+- Routing: Expo Router
+- UI Library: React Native Paper
+- Charts: React Native Chart Kit
+- AI Integration: Google Generative AI SDK
+- Testing: Jest & Testing Library
 
 ---
 
-## 📦 Instalação e Execução
+## 📦 Getting Started
 
-Siga os passos abaixo para rodar o projeto localmente.
-
-### Pré-requisitos
+### Prerequisites
 - Node.js (v18+)
-- npm ou yarn
-- Conta no Firebase (para configuração de credenciais)
+- npm or yarn
+- Firebase account
 
-### 1. Clone o repositório
+---
+
+### 1. Clone the repository
+
 ```bash
 git clone https://github.com/ricardoiwata/conta-certa.git
 cd conta-certa
 ```
 
-### 2. Configurando o Backend
+---
+
+### 2. Backend Setup
 
 ```bash
 cd backend
-
-# Instale as dependências
 npm install
-
-# Configure as variáveis de ambiente e credenciais do Firebase
-# (Crie um arquivo firebase-credentials.json na raiz do backend se necessário)
-
-# Execute o servidor em modo de desenvolvimento
 npm run start:dev
 ```
-_O backend rodará por padrão em `http://localhost:3000`_
 
-### 3. Configurando o Frontend
-
-Abra um novo terminal na raiz do projeto:
-
-```bash
-cd frontend
-
-# Instale as dependências
-npm install
-
-# Configure o arquivo .env
-cp .env.example .env
-# Preencha o .env com suas chaves do Firebase e Gemini API
-
-# Execute o app
-npm start
-```
-_Use o aplicativo **Expo Go** no seu celular ou um emulador Android/iOS para visualizar._
+Backend runs at http://localhost:3000
 
 ---
 
-## 🧪 Rodando os Testes
+### 3. Frontend Setup
 
-Garanta a qualidade do código executando os testes unitários e e2e.
+```bash
+cd frontend
+npm install
+cp .env.example .env
+npm start
+```
 
-**Backend:**
+Use Expo Go or an emulator to run the app.
+
+---
+
+## 🧪 Running Tests
+
+Backend:
 ```bash
 cd backend
 npm test
 ```
 
-**Frontend:**
+Frontend:
 ```bash
 cd frontend
 npm test
@@ -110,21 +105,15 @@ npm test
 
 ---
 
-## 📂 Estrutura do Projeto
+## 📂 Project Structure
 
 ```
 conta-certa/
-├── backend/          # API NestJS
+├── backend/
 │   ├── src/
-│   │   ├── modules/  # Módulos da aplicação (Despesa, Receita, Usuário...)
-│   │   └── ...
-│   └── test/         # Testes e2e
-├── frontend/         # App Expo
-│   ├── app/          # Rotas (Expo Router)
+│   ├── test/
+├── frontend/
+│   ├── app/
 │   ├── src/
-│   │   ├── components/
-│   │   ├── screens/
-│   │   └── services/
-│   └── ...
 └── README.md
 ```
